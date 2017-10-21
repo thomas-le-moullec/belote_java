@@ -20,6 +20,7 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         //.setAllowedOrigins("*").withSockJS(); => Cross origin
         registry.addEndpoint("/jcoinche").setAllowedOrigins("*").withSockJS();
+        registry.addEndpoint("/");
     }
 
 }

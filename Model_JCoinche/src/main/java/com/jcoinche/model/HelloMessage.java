@@ -7,10 +7,9 @@ public class HelloMessage {
     public HelloMessage() {
     }
 
-    public HelloMessage(String name, int id) {
+    public HelloMessage(String name) {
 
         this.name = name;
-        this.idGuest = id;
     }
 
     public String getName() {
@@ -21,15 +20,5 @@ public class HelloMessage {
     public void setName(String name) {
 
         this.name = name;
-    }
-
-    public int getIdGuest() {
-
-        return idGuest;
-    }
-
-    public void setName(int id) {
-
-        this.idGuest = id;
     }
 }
