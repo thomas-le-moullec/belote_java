@@ -63,10 +63,10 @@ public class Client {
         return stompClient.connect(url, headers, new MyHandler(), urlConnection, port);
     }
 
-    public void askForSomething(StompSession stompSession, String name) {
+    public void greeting(StompSession stompSession, String name) {
         String jsonHello = "{\"name\" : \""+name+"\" }";
-        System.out.print("Name entered :"+jsonHello);
-        stompSession.send("/app/jcoinche/"+getIdClient(), jsonHello.getBytes());
+        System.out.print("Name entered :"+jsonHello);//debug
+        stompSession.send("/app/jcoinche/greeting/"+getIdClient(), jsonHello.getBytes());
     }
 
     private class MyHandler extends StompSessionHandlerAdapter {
@@ -117,7 +117,7 @@ public class Client {
 
         String userName = client.getInfosFromUser("What is your name ?");
 
-        client.askForSomething(stompSession, userName);
+        client.greeting(stompSession, userName);//Ping Server TimerTask
 
         Thread.sleep(180000);
     }
