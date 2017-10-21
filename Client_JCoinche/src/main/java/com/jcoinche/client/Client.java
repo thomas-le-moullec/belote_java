@@ -26,7 +26,7 @@ public class Client {
     private static Logger logger = Logger.getLogger(Client.class);
     private final static WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
-    public ListenableFuture<StompSession> connect(String urlConnection, int port) {
+    public ListenableFuture<StompSession> connect(int port, String urlConnection) {
 
         Transport webSocketTransport = new WebSocketTransport(new StandardWebSocketClient());
         List<Transport> transports = Collections.singletonList(webSocketTransport);
@@ -46,7 +46,31 @@ public class Client {
         }
     }
 
+    static boolean isInt(String s)
+    {
+        try
+        { int i = Integer.parseInt(s); return true; }
+
+        catch(NumberFormatException er)
+        { return false; }
+    }
+
     public static void main(String[] args) throws Exception {
+        String url = "localhost";
+        int port = 8080;
+        Client client = new Client();
+
+        if (args.length > 1 && !args[1].isEmpty()) {
+            url = args[1];
+        }
+        if (args.length > 0 && isInt(args[0])) {
+            port = Integer.parseInt(args[0]);
+        }
+
+        System.out.println("Port : "+port+ " url : "+url);
+        ListenableFuture<StompSession> f = client.connect(port, url);
+        StompSession stompSession = f.get();
+
 
         Thread.sleep(180000);
     }
