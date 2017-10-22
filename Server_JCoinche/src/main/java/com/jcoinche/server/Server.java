@@ -50,6 +50,64 @@ public class Server {
         return true;
     }
 
+
+    private Boolean compareColor(Card card1, Card card2) {
+        return (card1.getType() == card2.getType());
+    }
+
+    private Boolean isAsset(Card card, Card.TypeCard asset) {
+        return (card.getType() == asset);
+    }
+
+    private Boolean hasAsset(List<Card> cards, Card.TypeCard asset) {
+        for (int i = 0; i < cards.size(); i++) {
+            if (cards.get(i).getType() == asset) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Boolean checkCardExists(List<Card> cardList, Card card) {
+        for (int i = 0; i < cardList.size(); i++) {
+            if (cardList.get(i).getType() == card.getType() &&
+                    cardList.get(i).getValue() == card.getValue())
+                return true;
+        }
+        return false;
+    }
+
+    private Boolean checkValidity(Room myRoom, Player player, List<Card> fold, Card card) {
+        if (!checkCardExists(player.getCards(), card))
+            return false;
+        if (fold.size() == 0) {
+            return true;
+        }
+
+        if (compareColor(card, fold.get(fold.size() - 1)))
+            return true;
+        if (isAsset(card, myRoom.getBoard().getAsset().getType()))
+            return true;
+        if (!hasAsset(player.getCards(), myRoom.getBoard().getAsset().getType()))
+            return true;
+        return false;
+    }
+
+    @MessageMapping("/jcoinche/putCard/{id}")
+    @SendTo("/topic/users/{id}")
+    public boolean putCard(@DestinationVariable("id") String id, Card card) throws Exception {
+        Room myRoom = getRoomOfPlayer(id);
+        Player player = myRoom.getPlayer(id);
+        List<Card> fold = myRoom.getBoard().getFold();
+
+        if (!checkValidity(myRoom, player, fold, card)) {
+            return false;
+        }
+        myRoom.getBoard().getFold().add(card);
+        player.getCards().remove(card);
+        return true;
+    }
+
     @MessageMapping("/jcoinche/askForTask/{id}")
     @SendTo("/topic/users/{id}")
     public ProtoTask.Protocol askForTask(@DestinationVariable("id") String id) throws Exception {
