@@ -1,5 +1,6 @@
 package com.jcoinche.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Room {
@@ -12,12 +13,20 @@ public class Room {
     public Room() {
     }
 
-    public Room(int id, List<Player> players, int idTurn, Board board, int assetTaker) {
+    public Room(int id, List<Player> players, Board board, int assetTaker) {
         this.id = id;
         this.players = players;
-        this.idTurn = idTurn;
         this.board = board;
         this.assetTaker = assetTaker;
+    }
+
+    public Player createPlayer(String id) {
+        Player player = new Player();
+
+        player.setId(id);
+        player.setScore(0);
+        System.out.println("PLAYER ID:"+player.getId());
+        return (player);
     }
 
     public int getId() {
@@ -34,14 +43,6 @@ public class Room {
 
     public void setPlayers(List<Player> players) {
         this.players = players;
-    }
-
-    public int getIdTurn() {
-        return idTurn;
-    }
-
-    public void setIdTurn(int idTurn) {
-        this.idTurn = idTurn;
     }
 
     public Board getBoard() {

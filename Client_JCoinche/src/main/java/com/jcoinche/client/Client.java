@@ -1,4 +1,6 @@
 package com.jcoinche.client;
+import com.jcoinche.model.Player;
+import com.jcoinche.model.Room;
 import org.apache.log4j.Logger;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -97,6 +99,12 @@ public class Client {
         return "";
     }
 
+    /*public static void createPlayer() {
+        Player player = new Player();
+        List<Room> rooms;
+        System.out.println(rooms.length);
+    }*/
+
     public static void main(String[] args) throws Exception {
         String url = "localhost";
         int port = 8080;
@@ -118,6 +126,8 @@ public class Client {
         String userName = client.getInfosFromUser("What is your name ?");
 
         client.greeting(stompSession, userName);//Ping Server TimerTask
+
+        //createPlayer();
 
         Thread.sleep(180000);
     }
