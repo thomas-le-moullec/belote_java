@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Board {
-    private Map<Integer, String> valueCard = new HashMap<Integer, String>();
-    private Map<Integer, String> valueCardAsset = new HashMap<Integer, String>();
+    private Map<String, Integer> valueCard = new HashMap<String, Integer>();
+    private Map<String, Integer> valueCardAsset = new HashMap<String, Integer>();
     private Map<Integer, String> orderCard = new HashMap<Integer, String>();
     private Map<Integer, Card.TypeCard> typeCard = new HashMap<Integer, Card.TypeCard>();
 
@@ -28,22 +28,22 @@ public class Board {
         orderCard.put(5, "K");
         orderCard.put(6, "10");
         orderCard.put(7, "A");
-        valueCard.put(0, "7");
-        valueCard.put(0, "8");
-        valueCard.put(0, "9");
-        valueCard.put(2, "V");
-        valueCard.put(3, "Q");
-        valueCard.put(4, "K");
-        valueCard.put(10, "10");
-        valueCard.put(11, "A");
-        valueCardAsset.put(0, "7");
-        valueCardAsset.put(0, "8");
-        valueCardAsset.put(3, "Q");
-        valueCardAsset.put(4, "K");
-        valueCardAsset.put(10, "10");
-        valueCardAsset.put(11, "A");
-        valueCardAsset.put(14, "9");
-        valueCardAsset.put(20, "V");
+        valueCard.put("7", 0);
+        valueCard.put("8", 0);
+        valueCard.put("9", 0);
+        valueCard.put("V", 2);
+        valueCard.put("Q", 3);
+        valueCard.put("K", 4);
+        valueCard.put("10", 10);
+        valueCard.put("A", 11);
+        valueCardAsset.put("7", 0);
+        valueCardAsset.put("8", 0);
+        valueCardAsset.put("Q", 3);
+        valueCardAsset.put("K", 4);
+        valueCardAsset.put("10", 10);
+        valueCardAsset.put("A", 11);
+        valueCardAsset.put("9", 14);
+        valueCardAsset.put("V", 20);
 
         typeCard.put(0, Card.TypeCard.HEART);
         typeCard.put(1, Card.TypeCard.SPADES);
@@ -81,19 +81,19 @@ public class Board {
         this.typeCard = typeCard;
     }
 
-    public void setValueCard(Map<Integer, String> valueCard) {
+    public void setValueCard(Map<String, Integer> valueCard) {
         this.valueCard = valueCard;
     }
 
-    public void setValueCardAsset(Map<Integer, String> valueCardAsset) {
+    public void setValueCardAsset(Map<String, Integer> valueCardAsset) {
         this.valueCardAsset = valueCardAsset;
     }
 
-    public Map<Integer, String> getValueCard() {
+    public Map<String, Integer> getValueCard() {
         return valueCard;
     }
 
-    public Map<Integer, String> getValueCardAsset() {
+    public Map<String, Integer> getValueCardAsset() {
         return valueCardAsset;
     }
 

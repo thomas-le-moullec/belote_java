@@ -12,6 +12,8 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 
 @Controller
@@ -51,15 +53,15 @@ public class Server {
     }
 
 
-    private Boolean compareColor(Card card1, Card card2) {
+    public static Boolean compareColor(Card card1, Card card2) {
         return (card1.getType() == card2.getType());
     }
 
-    private Boolean isAsset(Card card, Card.TypeCard asset) {
+    public static Boolean isAsset(Card card, Card.TypeCard asset) {
         return (card.getType() == asset);
     }
 
-    private Boolean hasAsset(List<Card> cards, Card.TypeCard asset) {
+    public static Boolean hasAsset(List<Card> cards, Card.TypeCard asset) {
         for (int i = 0; i < cards.size(); i++) {
             if (cards.get(i).getType() == asset) {
                 return true;
@@ -68,7 +70,7 @@ public class Server {
         return false;
     }
 
-    private Boolean checkCardExists(List<Card> cardList, Card card) {
+    public static Boolean checkCardExists(List<Card> cardList, Card card) {
         for (int i = 0; i < cardList.size(); i++) {
             if (cardList.get(i).getType() == card.getType() &&
                     cardList.get(i).getValue() == card.getValue())
@@ -77,7 +79,7 @@ public class Server {
         return false;
     }
 
-    private Boolean checkValidity(Room myRoom, Player player, List<Card> fold, Card card) {
+    public static Boolean checkValidity(Room myRoom, Player player, List<Card> fold, Card card) {
         if (!checkCardExists(player.getCards(), card))
             return false;
         if (fold.size() == 0) {
@@ -106,6 +108,73 @@ public class Server {
         myRoom.getBoard().getFold().add(card);
         player.getCards().remove(card);
         return true;
+    }
+
+    @MessageMapping("/jcoinche/distributeCards/{id}")
+    @SendTo("/topic/users/{id}")
+    public void distributeCards(@DestinationVariable("id") String id) throws Exception {
+        Room myRoom = getRoomOfPlayer(id);
+        int index;
+
+        for (int tour = 0; tour < 5; tour++) {
+            for (int i = 0; i < myRoom.getPlayers().size(); i++) {
+                index = new Random().nextInt(myRoom.getBoard().getPick().size());
+                myRoom.getPlayers().get(i).getCards().add(myRoom.getBoard().getPick().get(index));
+                myRoom.getBoard().getPick().remove(index);
+            }
+        }
+        System.out.println();
+    }
+
+    public static int determineFoldWinner(List<Card> fold, Card firstCard, Card.TypeCard asset, Map<String, Integer> valueAsset, Map<String, Integer> valueNonAsset) {
+        int max;
+
+        max = 0;
+        for (int i = 1; i < fold.size(); i++) {
+            if (compareColor(fold.get(i), fold.get(max))) {
+                if (isAsset(firstCard, asset)) {
+                    if (valueAsset.get(fold.get(i).getValue()) > valueAsset.get(fold.get(max).getValue())) {
+                        max = i;
+                    }
+                }
+                else {
+                    if (valueNonAsset.get(fold.get(i).getValue()) > valueNonAsset.get(fold.get(max).getValue())) {
+                        max = i;
+                    }
+                }
+            }
+            else {
+                if (isAsset(fold.get(i), asset)) {
+                    max = i;
+                }
+                if (fold.get(i).getType() == firstCard.getType() && !isAsset(fold.get(max), asset)) {
+                    max = i;
+                }
+            }
+        }
+        return max;
+    }
+
+    @MessageMapping("/jcoinche/countFoldScore/{id}")
+    @SendTo("/topic/users/{id}")
+    public void countFoldScore(@DestinationVariable("i") String id) throws Exception {
+        int index = determineFoldWinner(getRoomOfPlayer(id).getBoard().getFold(),
+                getRoomOfPlayer(id).getBoard().getFold().get(0),
+                getRoomOfPlayer(id).getBoard().getAsset().getType(),
+                getRoomOfPlayer(id).getBoard().getValueCardAsset(),
+                getRoomOfPlayer(id).getBoard().getValueCard());
+
+        int score = getRoomOfPlayer(id).getPlayers().get(index).getScore();
+
+        for (int i = 0; i < getRoomOfPlayer(id).getBoard().getFold().size(); i++) {
+            if (isAsset(getRoomOfPlayer(id).getBoard().getFold().get(i), getRoomOfPlayer(id).getBoard().getAsset().getType())) {
+                score += getRoomOfPlayer(id).getBoard().getValueCardAsset().get(getRoomOfPlayer(id).getBoard().getFold().get(i).getValue());
+            }
+            else {
+                score += getRoomOfPlayer(id).getBoard().getValueCard().get(getRoomOfPlayer(id).getBoard().getFold().get(i).getValue());
+            }
+        }
+        getRoomOfPlayer(id).getPlayers().get(index).setScore(score);
     }
 
     @MessageMapping("/jcoinche/askForTask/{id}")
