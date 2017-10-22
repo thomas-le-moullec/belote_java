@@ -54,8 +54,6 @@ public class Server {
         }
 
         exchangeCards(myRoom, player, card);
-        //myRoom.getBoard().getFold().add(card);
-        //player.getCards().remove(card);
         return true;
     }
 
@@ -78,10 +76,7 @@ public class Server {
             newPlayer.setTeam((rooms.size() - 1) % 2);
             rooms.get(rooms.size() - 1).getPlayers().add(newPlayer);
             if (rooms.get(rooms.size() - 1).getPlayers().size() == 4) {
-                for (int i = 0; i < 4; i++) {
-                    distributeCards(rooms.get(rooms.size() - 1).getPlayers().get(i).getId());
-                    rooms.get(rooms.size() - 1).getPlayers().get(i).setTask(ProtoTask.Protocol.TAKECARD);
-                }
+                distributeCards(rooms.get(rooms.size() - 1));
             }
         }
     }
@@ -152,8 +147,7 @@ public class Server {
         getRoomOfPlayer(id).getPlayers().get(index).setScore(score);
     }
 
-    public void distributeCards(String id) throws Exception {
-        Room myRoom = getRoomOfPlayer(id);
+    public void distributeCards(Room myRoom) throws Exception {
         int index;
 
         for (int tour = 0; tour < 5; tour++) {
@@ -163,7 +157,6 @@ public class Server {
                 myRoom.getBoard().getPick().remove(index);
             }
         }
-        System.out.println();
     }
 
     public static int determineFoldWinner(List<Card> fold, Card firstCard, Card.TypeCard asset, Map<String, Integer> valueAsset, Map<String, Integer> valueNonAsset) {
