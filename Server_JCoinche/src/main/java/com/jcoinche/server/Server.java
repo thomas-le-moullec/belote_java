@@ -54,6 +54,8 @@ public class Server {
         }
 
         exchangeCards(myRoom, player, card);
+        //myRoom.getBoard().getFold().add(card);
+        //player.getCards().remove(card);
         return true;
     }
 
@@ -77,6 +79,9 @@ public class Server {
             rooms.get(rooms.size() - 1).getPlayers().add(newPlayer);
             if (rooms.get(rooms.size() - 1).getPlayers().size() == 4) {
                 distributeCards(rooms.get(rooms.size() - 1));
+                for (int i = 0; i < 4; i++) {
+                    rooms.get(rooms.size() - 1).getPlayers().get(i).setTask(ProtoTask.Protocol.TAKECARD);
+                }
             }
         }
     }
@@ -150,13 +155,20 @@ public class Server {
     public void distributeCards(Room myRoom) throws Exception {
         int index;
 
+        System.out.println("ROOM.GET_PLAYER.SIZE()="+myRoom.getPlayers().size());
+        System.out.println("ROOM.PICK_SIZE()="+myRoom.getBoard().getPick().size());
+        System.out.println("ROOM.GETPLAYERS_SIZE="+myRoom.getPlayers().size());
+        //System.out.println("ROOM.GET_PLAYER.SIZE()="+myRoom.getPlayers().size());
+
         for (int tour = 0; tour < 5; tour++) {
             for (int i = 0; i < myRoom.getPlayers().size(); i++) {
                 index = new Random().nextInt(myRoom.getBoard().getPick().size());
                 myRoom.getPlayers().get(i).getCards().add(myRoom.getBoard().getPick().get(index));
                 myRoom.getBoard().getPick().remove(index);
+                System.out.println(":::::");
             }
         }
+        System.out.println("-----------------------------------------");
     }
 
     public static int determineFoldWinner(List<Card> fold, Card firstCard, Card.TypeCard asset, Map<String, Integer> valueAsset, Map<String, Integer> valueNonAsset) {
