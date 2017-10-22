@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.*;
 
@@ -102,30 +103,52 @@ public class ServerTest {
         player.getCards().add(card);
         serverTest.exchangeCards(room, player, card);
         assertTrue(room.getBoard().getFold().get(1).getType() == Card.TypeCard.SPADES);
-        assertTrue(room.getBoard().getFold().get(1).getType() == Card.TypeCard.SPADES);
-        assertTrue(room.getBoard().getFold().get(1).getType() == Card.TypeCard.SPADES);
+        assertTrue(player.getCards().size() == 0);
+    }
+
+    @Test
+    public void distributeCardsTest() throws Exception {
+        Room room = new Room();
+
+        room.setPlayers(new ArrayList<>());
+        for (int i = 0; i < 4; i++) {
+            room.getPlayers().add(new Player());
+            room.getPlayers().get(i).setCards(new ArrayList<>());
+        }
+        room.setBoard(new Board());
+        room.getBoard().setPick(new ArrayList<>());
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "K", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "Q", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "V", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "10", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "9", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "K", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "Q", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "V", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "10", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "9", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "K", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "Q", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "V", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "10", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "9", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "K", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "Q", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "V", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "10", 0));
+        room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "9", 0));
+
+    //        serverTest.distributeCards(room);
+
+    //      assertTrue("------------->"+room.getPlayers().size(), room.getPlayers().get(0).getCards().get(0).getType() == Card.TypeCard.CLUBS);
     }
 }
 
 /*
-@MessageMapping("/jcoinche/putCard/{id}")
-    @SendTo("/topic/users/{id}")
-    public boolean putCard(@DestinationVariable("id") String id, Card card) throws Exception {
-        Room myRoom = getRoomOfPlayer(id);
-        Player player = myRoom.getPlayer(id);
-        List<Card> fold = myRoom.getBoard().getFold();
-
-        if (!checkValidity(myRoom, player, fold, card)) {
-            return false;
-        }
-        myRoom.getBoard().getFold().add(card);
-        player.getCards().remove(card);
-        return true;
-    }
 
     @MessageMapping("/jcoinche/distributeCards/{id}")
     @SendTo("/topic/users/{id}")
-    public void distributeCards(@DestinationVariable("id") String id) throws Exception {
+    public void distributeCards(room) throws Exception {
         Room myRoom = getRoomOfPlayer(id);
         int index;
 

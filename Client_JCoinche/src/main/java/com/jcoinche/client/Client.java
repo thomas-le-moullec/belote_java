@@ -192,6 +192,12 @@ public class Client {
         }
     }
 
+    public void displayCards() {
+        for (int i = 0; i < cards.size(); i++) {
+            System.out.println("---> Card [" + i + "] = " + cards.get(i).getType() + " - " + cards.get(i).getValue());
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         String url = "localhost";
         int port = 8080;
