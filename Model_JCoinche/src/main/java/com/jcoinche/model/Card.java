@@ -1,17 +1,19 @@
 package com.jcoinche.model;
 
+import java.util.*;
+
 public class Card {
 
     public enum TypeCard {HEART, SPADES, DIAMOND, CLUBS}
 
     private TypeCard type;
-    private int value;
+    private String value;
     private int playerId;
 
     public Card() {
     }
 
-    public Card (TypeCard type, int value, int playerId) {
+    public Card (TypeCard type, String value, int playerId) {
         this.type = type;
         this.value = value;
         this.playerId = playerId;
@@ -25,11 +27,11 @@ public class Card {
         this.type = type;
     }
 
-    public int getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class Client {
 
@@ -68,6 +69,11 @@ public class Client {
         String jsonHello = "{\"name\" : \""+name+"\" }";
         System.out.print("Name entered :"+jsonHello);//debug
         stompSession.send("/app/jcoinche/greeting/"+getIdClient(), jsonHello.getBytes());
+    }
+
+    public void askForTask(StompSession stompSession) {
+        String jsonHello = "";
+        stompSession.send("/app/jcoinche/askForTask/"+getIdClient(), jsonHello.getBytes());
     }
 
     private class MyHandler extends StompSessionHandlerAdapter {
@@ -130,9 +136,10 @@ public class Client {
 
         String userName = client.getInfosFromUser("What is your name ?");
 
-        client.greeting(stompSession, userName);//Ping Server TimerTask
-
-
+        client.greeting(stompSession, userName);
+        TimeUnit.SECONDS.sleep(1);
+        client.askForTask(stompSession);
+        //run TimerTask;
 
         Thread.sleep(180000);
     }

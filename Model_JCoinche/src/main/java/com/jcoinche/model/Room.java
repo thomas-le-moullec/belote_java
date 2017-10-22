@@ -1,7 +1,9 @@
 package com.jcoinche.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Room {
     private int id;
@@ -20,6 +22,14 @@ public class Room {
         this.assetTaker = assetTaker;
     }
 
+    public void setIdTurn(int idTurn) {
+        this.idTurn = idTurn;
+    }
+
+    public int getIdTurn() {
+        return idTurn;
+    }
+
     public int getId() {
         return id;
     }
@@ -30,6 +40,17 @@ public class Room {
 
     public List<Player> getPlayers() {
         return players;
+    }
+
+    public Player getPlayer(String idPlayer) {
+        int id = 0;
+        for (int i = 0; i < this.players.size(); i++) {
+            if (idPlayer == this.players.get(i).getId()) {
+                id = i;
+                break;
+            }
+        }
+        return this.players.get(id);
     }
 
     public void setPlayers(List<Player> players) {
