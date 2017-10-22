@@ -205,10 +205,10 @@ public class Client {
         Client client = new Client(url, port);
 
         logger.info("Subscribing to greeting topic using session " + client.getStompSession());
-        String userName = client.getInfosFromUser("What is your name ?");
-        client.greeting(client.getStompSession(), userName);
-        TimeUnit.SECONDS.sleep(2);
+        //String userName = client.getInfosFromUser("What is your name ?");
+        client.greeting(client.getStompSession(), "guest");
         //run TimerTask every second;
+        //TimeUnit.SECONDS.sleep(3);
         client.runTask(client);
         //Timer for AFK
         Thread.sleep(180000);

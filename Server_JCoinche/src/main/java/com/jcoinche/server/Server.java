@@ -32,7 +32,7 @@ public class Server {
 
     @MessageMapping("/jcoinche/takeCards/{id}")
     @SendTo("/topic/takeCards/{id}")
-    public Player takeCardS(@DestinationVariable("id") String id) throws Exception {
+    public Player takeCards(@DestinationVariable("id") String id) throws Exception {
 
         System.out.println("IN TAKECARD");
         //Conditions to determine what to do.
