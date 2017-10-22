@@ -3,14 +3,12 @@ package com.jcoinche.model;
 public class ProtoTask {
     public enum Protocol {WAIT, TAKECARD, GETASSET, PUTCARD}
     private Protocol task;
-    private Board board;
 
     public ProtoTask() {
     }
 
-    public ProtoTask (Protocol taskToDo, Board board) {
+    public ProtoTask (Protocol taskToDo) {
         this.task = taskToDo;
-        this.board = board;
     }
 
     public Protocol getTask() {
@@ -19,13 +17,5 @@ public class ProtoTask {
 
     public void setTask(Protocol taskToDo) {
         this.task = taskToDo;
-    }
-
-    public Board getboard() {
-        return this.board;
-    }
-
-    public void setBoard(Board board) {
-        this.board = board;
     }
 }
