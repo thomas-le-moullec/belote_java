@@ -29,7 +29,7 @@ public class ServerTest {
         Card.TypeCard type = Card.TypeCard.HEART;
 
         card.setType(Card.TypeCard.CLUBS);
-        assertTrue(card != assert);
+        //assertTrue(card != assert);
     }
 
 }

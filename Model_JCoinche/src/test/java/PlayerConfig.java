@@ -14,8 +14,8 @@ public class PlayerConfig {
     public Player PlayerTest() {
         List<Card> myCardList = new ArrayList<>();
         myCardList.add(new Card());
-        Player myPlayer = new Player("0", myCardList, 0, 0, ProtoTask.Protocol.WAIT);
-
+//        Player myPlayer = new Player("0", myCardList, 0, 0, ProtoTask.Protocol.WAIT);
+Player myPlayer = new Player();
         return myPlayer;
     }
 }
