@@ -45,13 +45,6 @@ public class Server {
         addPlayerInRoom(id);
         return new Greeting("Hello, " + message.getName() + "!");
     }
-    
-    @MessageMapping("/jcoinche/putCard/{id}")
-    @SendTo("/topic/users/{id}")
-    public boolean checkFold(@DestinationVariable("id") String id, Card card) throws Exception {
-        return true;
-    }
-
 
     public static Boolean compareColor(Card card1, Card card2) {
         return (card1.getType() == card2.getType());
