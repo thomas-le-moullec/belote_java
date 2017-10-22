@@ -88,6 +88,11 @@ public class Server {
         return false;
     }
 
+    public static void exchangeCards(Room myRoom, Player player, Card card) {
+        myRoom.getBoard().getFold().add(card);
+        player.getCards().remove(card);
+    }
+
     @MessageMapping("/jcoinche/putCard/{id}")
     @SendTo("/topic/users/{id}")
     public boolean putCard(@DestinationVariable("id") String id, Card card) throws Exception {
@@ -98,8 +103,10 @@ public class Server {
         if (!checkValidity(myRoom, player, fold, card)) {
             return false;
         }
-        myRoom.getBoard().getFold().add(card);
-        player.getCards().remove(card);
+
+        exchangeCards(myRoom, player, card);
+        //myRoom.getBoard().getFold().add(card);
+        //player.getCards().remove(card);
         return true;
     }
 
