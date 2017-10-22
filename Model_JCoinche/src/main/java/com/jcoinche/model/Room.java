@@ -20,15 +20,6 @@ public class Room {
         this.assetTaker = assetTaker;
     }
 
-    public Player createPlayer(String id) {
-        Player player = new Player();
-
-        player.setId(id);
-        player.setScore(0);
-        System.out.println("PLAYER ID:"+player.getId());
-        return (player);
-    }
-
     public int getId() {
         return id;
     }
