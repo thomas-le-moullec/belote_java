@@ -36,6 +36,14 @@ public class Client {
     private String idClient;
     private StompSession stompSession;
 
+    public Client(String url, int port) throws Exception {
+        {
+            ListenableFuture<StompSession> f = this.connect();
+            setStompSession(f.get());
+            suscribeTo();
+        }
+    }
+
     public String getIdClient() {
         return this.idClient;
     }
@@ -80,6 +88,9 @@ public class Client {
                 //System.out.println("RECEIVED IN HANDLEFRAME");
                 if (payload instanceof ProtoTask) {
                     System.out.println(((ProtoTask) payload).getTask());
+                    if (((ProtoTask) payload).getTask() == ProtoTask.Protocol.TAKECARD) {
+
+                    }
                 }
             }
         });
@@ -140,10 +151,16 @@ public class Client {
         time.schedule(new CustomTask(client), 0, TimeUnit.SECONDS.toMillis(2));
     }
 
+    public void suscribeTo() throws Exception {
+        {
+            subscribeUser();
+            subscribeInfos();
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         String url = "localhost";
         int port = 8080;
-        Client client = new Client();
 
         if (args.length > 1 && !args[1].isEmpty()) {
             url = args[1];
@@ -151,22 +168,16 @@ public class Client {
         if (args.length > 0 && isInt(args[0])) {
             port = Integer.parseInt(args[0]);
         }
-
-        //ListenableFuture<StompSession> f = client.connect(port, url);
-        ListenableFuture<StompSession> f = client.connect();
-        client.setStompSession(f.get());
+        Client client = new Client(url, port);
 
         logger.info("Subscribing to greeting topic using session " + client.getStompSession());
-        client.subscribeUser();
-        //client.subscribeInfos();
-        client.subscribeInfos();
         String userName = client.getInfosFromUser("What is your name ?");
         client.greeting(client.getStompSession(), userName);
 
-        TimeUnit.SECONDS.sleep(2);
-        client.askForTask(client.getStompSession());
-        //run TimerTask;
+        TimeUnit.SECONDS.sleep(1);
+        //run TimerTask every second;
         client.runTask(client);
+        //Timer for AFK
         Thread.sleep(180000);
     }
 }
