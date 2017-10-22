@@ -1,6 +1,4 @@
 package com.jcoinche.client;
-import com.jcoinche.model.Player;
-import com.jcoinche.model.Room;
 import org.apache.log4j.Logger;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -21,6 +19,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 
 public class Client {
@@ -106,6 +105,12 @@ public class Client {
     }*/
 
     public static void main(String[] args) throws Exception {
+        TimerTask timer = new TimerTask() {
+            @Override
+            public void run() {
+
+            }
+        };
         String url = "localhost";
         int port = 8080;
         Client client = new Client();
@@ -127,7 +132,7 @@ public class Client {
 
         client.greeting(stompSession, userName);//Ping Server TimerTask
 
-        //createPlayer();
+
 
         Thread.sleep(180000);
     }
