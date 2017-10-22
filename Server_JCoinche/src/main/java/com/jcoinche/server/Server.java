@@ -23,7 +23,7 @@ public class Server {
 
     public void addPlayerInRoom(String id) {
 
-        Player newPlayer = new Player(id, new ArrayList<Card>(), 0, 0, ProtoTask.Protocol.WAIT);
+        Player newPlayer = new Player(id, new ArrayList<Card>(), 0, 0, new ProtoTask(ProtoTask.Protocol.WAIT));
         if (rooms.size() == 0 || rooms.get(rooms.size() - 1).getPlayers().size() == 4) {
             rooms.add(new Room(rooms.size(), new ArrayList<Player>(), new Board(), 0));
         }
@@ -178,11 +178,11 @@ public class Server {
     }
 
     @MessageMapping("/jcoinche/askForTask/{id}")
-    @SendTo("/topic/users/{id}")
-    public ProtoTask.Protocol askForTask(@DestinationVariable("id") String id) throws Exception {
+    @SendTo("/topic/info/{id}")
+    public ProtoTask askForTask(@DestinationVariable("id") String id) throws Exception {
         //Conditions to determine what to do.
-        ProtoTask.Protocol task = getRoomOfPlayer(id).getPlayer(id).getTask();
-        System.out.print("Id User =>"+id+" WE WILL "+task+" !!! \n");
+        ProtoTask task = getRoomOfPlayer(id).getPlayer(id).getTaskProtocol();
+        System.out.print("Id User =>"+id+" WE WILL "+task.getTask()+" !!! \n");
         return task;
     }
 
