@@ -79,6 +79,7 @@ public class Server {
             rooms.get(rooms.size() - 1).getPlayers().add(newPlayer);
             if (rooms.get(rooms.size() - 1).getPlayers().size() == 4) {
                 distributeCards(rooms.get(rooms.size() - 1));
+                rooms.get(rooms.size() - 1).getBoard().setAsset(rooms.get(rooms.size() - 1).getBoard().getPick().get(new Random().nextInt(rooms.get(rooms.size() - 1).getBoard().getPick().size())));
                 for (int i = 0; i < 4; i++) {
                     rooms.get(rooms.size() - 1).getPlayers().get(i).setTask(ProtoTask.Protocol.TAKECARD);
                 }
@@ -152,7 +153,7 @@ public class Server {
         getRoomOfPlayer(id).getPlayers().get(index).setScore(score);
     }
 
-    public void distributeCards(Room myRoom) throws Exception {
+    public static void distributeCards(Room myRoom) throws Exception {
         int index;
 
         System.out.println("ROOM.GET_PLAYER.SIZE()="+myRoom.getPlayers().size());

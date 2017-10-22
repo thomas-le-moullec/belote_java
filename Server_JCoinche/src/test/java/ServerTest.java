@@ -138,9 +138,9 @@ public class ServerTest {
         room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "10", 0));
         room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "9", 0));
 
-    //        serverTest.distributeCards(room);
+        serverTest.distributeCards(room);
 
-    //      assertTrue("------------->"+room.getPlayers().size(), room.getPlayers().get(0).getCards().get(0).getType() == Card.TypeCard.CLUBS);
+        assertTrue("------------->"+room.getPlayers().size(), room.getPlayers().get(0).getCards().get(0).getType() == Card.TypeCard.CLUBS);
     }
 }
 
