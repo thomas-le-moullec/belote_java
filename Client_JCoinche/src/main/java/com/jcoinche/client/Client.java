@@ -1,6 +1,8 @@
 package com.jcoinche.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jcoinche.model.Card;
 import com.jcoinche.model.Greeting;
+import com.jcoinche.model.Player;
 import com.jcoinche.model.ProtoTask;
 import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.log4j.Logger;
@@ -35,6 +37,7 @@ public class Client {
     private final static WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
     private String idClient;
     private StompSession stompSession;
+    private List<Card> cards;
 
     public Client(String url, int port) throws Exception {
         {
@@ -42,6 +45,14 @@ public class Client {
             setStompSession(f.get());
             suscribeTo();
         }
+    }
+
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(List<Card> cards) {
+        this.cards = cards;
     }
 
     public String getIdClient() {
@@ -71,7 +82,7 @@ public class Client {
             @Override
             public void handleFrame(StompHeaders stompHeaders, Object o) {
                 String response = new String((byte[]) o);
-                System.out.print("Response = > " + response + "\n");
+                System.out.print(response + "\n");
             }
         });
     }
@@ -89,8 +100,26 @@ public class Client {
                 if (payload instanceof ProtoTask) {
                     System.out.println(((ProtoTask) payload).getTask());
                     if (((ProtoTask) payload).getTask() == ProtoTask.Protocol.TAKECARD) {
-
+                        System.out.println("GO IN TAKE CARDS\n");
+                        takeCards();
                     }
+                }
+            }
+        });
+    }
+
+    public void subscribePlayerCards() throws ExecutionException, InterruptedException {
+        getStompSession().subscribe("/topic/takeCards/" + getIdClient(), new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return Player.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                if (payload instanceof Player) {
+                    System.out.println(((Player) payload).getCards());
+                    setCards(((Player) payload).getCards());
                 }
             }
         });
@@ -115,6 +144,10 @@ public class Client {
     public void askForTask(StompSession stompSession) {
         System.out.print("ID is sending message:"+getIdClient()+"\n");//debug
         stompSession.send("/app/jcoinche/askForTask/"+getIdClient(), null);
+    }
+
+    public void takeCards() {
+        getStompSession().send("/app/jcoinche/takeCards/"+getIdClient(), null);
     }
 
     private class MyHandler extends StompSessionHandlerAdapter {
@@ -155,6 +188,7 @@ public class Client {
         {
             subscribeUser();
             subscribeInfos();
+            subscribePlayerCards();
         }
     }
 
@@ -173,7 +207,6 @@ public class Client {
         logger.info("Subscribing to greeting topic using session " + client.getStompSession());
         String userName = client.getInfosFromUser("What is your name ?");
         client.greeting(client.getStompSession(), userName);
-
         TimeUnit.SECONDS.sleep(1);
         //run TimerTask every second;
         client.runTask(client);
