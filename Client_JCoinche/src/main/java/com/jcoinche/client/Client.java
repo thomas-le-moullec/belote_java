@@ -181,7 +181,7 @@ public class Client {
     public void runTask(Client client){
         Timer time = new Timer(); // Instantiate Timer Object
 
-        time.schedule(new CustomTask(client), 0, TimeUnit.SECONDS.toMillis(2));
+        time.schedule(new CustomTask(client), 0, TimeUnit.SECONDS.toMillis(1));
     }
 
     public void suscribeTo() throws Exception {
@@ -207,7 +207,7 @@ public class Client {
         logger.info("Subscribing to greeting topic using session " + client.getStompSession());
         String userName = client.getInfosFromUser("What is your name ?");
         client.greeting(client.getStompSession(), userName);
-        TimeUnit.SECONDS.sleep(1);
+        TimeUnit.SECONDS.sleep(2);
         //run TimerTask every second;
         client.runTask(client);
         //Timer for AFK
