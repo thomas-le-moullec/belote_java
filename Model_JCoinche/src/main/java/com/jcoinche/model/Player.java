@@ -10,13 +10,13 @@ public class Player {
     private List<Card> cards;
     private int score;
     private int team;
-    private ProtoTask.Protocol task;
+    private ProtoTask task;
 
     public Player() {
 
     }
 
-    public Player (String id, List<Card> cards, int score, int team, ProtoTask.Protocol task) {
+    public Player (String id, List<Card> cards, int score, int team, ProtoTask task) {
         this.id = id;
         this.cards = cards;
         this.score = score;
@@ -24,12 +24,12 @@ public class Player {
         this.task = task;
     }
 
-    public ProtoTask.Protocol getTask() {
+    public ProtoTask getTaskProtocol() {
         return task;
     }
 
     public void setTask(ProtoTask.Protocol task) {
-        this.task = task;
+        this.task.setTask(task);
     }
 
     public String getId() {

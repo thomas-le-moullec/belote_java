@@ -1,11 +1,19 @@
 package com.jcoinche.client;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jcoinche.model.Greeting;
+import com.jcoinche.model.ProtoTask;
+import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.log4j.Logger;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
@@ -44,13 +52,15 @@ public class Client {
         this.stompSession = stompSession;
     }
 
-    public void subscribeUser(StompSession stompSession) throws ExecutionException, InterruptedException {
-        stompSession.subscribe("/topic/users/" + getIdClient(), new StompFrameHandler() {
+    public void subscribeUser() throws ExecutionException, InterruptedException {
+        getStompSession().subscribe("/topic/users/" + getIdClient(), new StompFrameHandler() {
 
+            @Override
             public Type getPayloadType(StompHeaders stompHeaders) {
                 return byte[].class;
             }
 
+            @Override
             public void handleFrame(StompHeaders stompHeaders, Object o) {
                 String response = new String((byte[]) o);
                 System.out.print("Response = > " + response + "\n");
@@ -58,18 +68,31 @@ public class Client {
         });
     }
 
-    public ListenableFuture<StompSession> connect(int port, String urlConnection) {
+    public void subscribeInfos() throws ExecutionException, InterruptedException {
+        getStompSession().subscribe("/topic/info/" + getIdClient(), new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return ProtoTask.class;
+            }
 
-        Transport webSocketTransport = new WebSocketTransport(new StandardWebSocketClient());
-        List<Transport> transports = Collections.singletonList(webSocketTransport);
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                //System.out.println("RECEIVED IN HANDLEFRAME");
+                if (payload instanceof ProtoTask) {
+                    System.out.println(((ProtoTask) payload).getTask());
+                }
+            }
+        });
+    }
 
-        SockJsClient sockJsClient = new SockJsClient(transports);
-        sockJsClient.setMessageCodec(new Jackson2SockJsMessageCodec());
+    public ListenableFuture<StompSession> connect() {
+        WebSocketClient webSocketClient = new StandardWebSocketClient();
+        WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
+        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+        stompClient.setTaskScheduler(new ConcurrentTaskScheduler());
 
-        WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
-
-        String url = "ws://{host}:{port}/jcoinche/";
-        return stompClient.connect(url, headers, new MyHandler(), urlConnection, port);
+        String url = "ws://{host}:{port}/";
+        return stompClient.connect(url, headers, new MyHandler(), "localhost", 8080);
     }
 
     public void greeting(StompSession stompSession, String name) {
@@ -79,8 +102,8 @@ public class Client {
     }
 
     public void askForTask(StompSession stompSession) {
-        String jsonHello = "";
-        stompSession.send("/app/jcoinche/askForTask/"+getIdClient(), jsonHello.getBytes());
+        System.out.print("ID is sending message:"+getIdClient()+"\n");//debug
+        stompSession.send("/app/jcoinche/askForTask/"+getIdClient(), null);
     }
 
     private class MyHandler extends StompSessionHandlerAdapter {
@@ -111,12 +134,6 @@ public class Client {
         return "";
     }
 
-    /*public static void createPlayer() {
-        Player player = new Player();
-        List<Room> rooms;
-        System.out.println(rooms.length);
-    }*/
-
     public void runTask(Client client){
         Timer time = new Timer(); // Instantiate Timer Object
 
@@ -135,16 +152,18 @@ public class Client {
             port = Integer.parseInt(args[0]);
         }
 
-        ListenableFuture<StompSession> f = client.connect(port, url);
+        //ListenableFuture<StompSession> f = client.connect(port, url);
+        ListenableFuture<StompSession> f = client.connect();
         client.setStompSession(f.get());
 
         logger.info("Subscribing to greeting topic using session " + client.getStompSession());
-        client.subscribeUser(client.getStompSession());
-
+        client.subscribeUser();
+        //client.subscribeInfos();
+        client.subscribeInfos();
         String userName = client.getInfosFromUser("What is your name ?");
-
         client.greeting(client.getStompSession(), userName);
-        TimeUnit.SECONDS.sleep(1);
+
+        TimeUnit.SECONDS.sleep(2);
         client.askForTask(client.getStompSession());
         //run TimerTask;
         client.runTask(client);
