@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Player {
 
-    private int id;
+    private String id;
     private List<Card> cards;
     private int score;
     private int team;
@@ -15,18 +15,18 @@ public class Player {
 
     }
 
-    public Player (int id, List<Card> cards, int score, int team) {
+    public Player (String id, List<Card> cards, int score, int team) {
         this.id = id;
         this.cards = cards;
         this.score = score;
         this.team = team;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -69,6 +69,11 @@ public class Client {
         stompSession.send("/app/jcoinche/greeting/"+getIdClient(), jsonHello.getBytes());
     }
 
+    public void askForTask(StompSession stompSession) {
+        String jsonHello = "";
+        stompSession.send("/app/jcoinche/askForTask/"+getIdClient(), jsonHello.getBytes());
+    }
+
     private class MyHandler extends StompSessionHandlerAdapter {
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
             setIdClient(stompSession.getSessionId().toString());
@@ -117,7 +122,9 @@ public class Client {
 
         String userName = client.getInfosFromUser("What is your name ?");
 
-        client.greeting(stompSession, userName);//Ping Server TimerTask
+        //client.greeting(stompSession, userName);
+        client.askForTask(stompSession);
+        //run TimerTask;
 
         Thread.sleep(180000);
     }
