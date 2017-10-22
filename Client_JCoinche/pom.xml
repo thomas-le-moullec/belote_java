@@ -34,6 +34,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-messaging</artifactId>
         </dependency>
+        <dependency>
+            <groupId>Java_JCoinche_2017</groupId>
+            <artifactId>Server_JCoinche</artifactId>
+            <version>0.1.0</version>
+        </dependency>
     </dependencies>
 
     <build>

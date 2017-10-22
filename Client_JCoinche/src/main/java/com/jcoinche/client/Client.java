@@ -17,9 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +26,7 @@ public class Client {
     private static Logger logger = Logger.getLogger(Client.class);
     private final static WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
     private String idClient;
+    private StompSession stompSession;
 
     public String getIdClient() {
         return this.idClient;
@@ -35,6 +34,14 @@ public class Client {
 
     public void setIdClient(String id) {
         this.idClient = id;
+    }
+
+    public StompSession getStompSession() {
+        return stompSession;
+    }
+
+    public void setStompSession(StompSession stompSession) {
+        this.stompSession = stompSession;
     }
 
     public void subscribeUser(StompSession stompSession) throws ExecutionException, InterruptedException {
@@ -110,13 +117,13 @@ public class Client {
         System.out.println(rooms.length);
     }*/
 
-    public static void main(String[] args) throws Exception {
-        TimerTask timer = new TimerTask() {
-            @Override
-            public void run() {
+    public void runTask(Client client){
+        Timer time = new Timer(); // Instantiate Timer Object
 
-            }
-        };
+        time.schedule(new CustomTask(client), 0, TimeUnit.SECONDS.toMillis(2));
+    }
+
+    public static void main(String[] args) throws Exception {
         String url = "localhost";
         int port = 8080;
         Client client = new Client();
@@ -129,18 +136,18 @@ public class Client {
         }
 
         ListenableFuture<StompSession> f = client.connect(port, url);
-        StompSession stompSession = f.get();
+        client.setStompSession(f.get());
 
-        logger.info("Subscribing to greeting topic using session " + stompSession);
-        client.subscribeUser(stompSession);
+        logger.info("Subscribing to greeting topic using session " + client.getStompSession());
+        client.subscribeUser(client.getStompSession());
 
         String userName = client.getInfosFromUser("What is your name ?");
 
-        client.greeting(stompSession, userName);
+        client.greeting(client.getStompSession(), userName);
         TimeUnit.SECONDS.sleep(1);
-        client.askForTask(stompSession);
+        client.askForTask(client.getStompSession());
         //run TimerTask;
-
+        client.runTask(client);
         Thread.sleep(180000);
     }
 }
