@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
 public class CardTest {
 
     @Autowired
-    private Card myClassTest;
+    private Card CardTest;
 
     @Test
     public void getTypeTest() {

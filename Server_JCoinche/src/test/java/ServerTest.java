@@ -3,6 +3,9 @@ import com.jcoinche.server.Server;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 public class ServerTest {
@@ -19,19 +22,37 @@ public class ServerTest {
         card1.setType(Card.TypeCard.CLUBS);
         card2.setType(Card.TypeCard.CLUBS);
         card3.setType(Card.TypeCard.HEART);
-        assertTrue(Server.compareColor(card1, card2));
-        assertTrue(!Server.compareColor(card1, card3));
+        assertTrue(serverTest.compareColor(card1, card2));
+        assertTrue(!serverTest.compareColor(card1, card3));
     }
 
     @Test
     public void isAssetTest() {
         Card card = new Card();
-        Card.TypeCard type = Card.TypeCard.HEART;
 
         card.setType(Card.TypeCard.CLUBS);
-        //assertTrue(card != assert);
+        assertTrue(serverTest.isAsset(card, Card.TypeCard.CLUBS));
+        assertTrue(!serverTest.isAsset(card, Card.TypeCard.HEART));
     }
 
+    @Test
+    public void hasAssetTest() {
+        List<Card> cardList = new ArrayList<>();
+
+        cardList.add(new Card());
+        cardList.add(new Card());
+        cardList.add(new Card());
+        cardList.add(new Card());
+        cardList.add(new Card());
+        cardList.get(0).setType(Card.TypeCard.HEART);
+        cardList.get(1).setType(Card.TypeCard.HEART);
+        cardList.get(2).setType(Card.TypeCard.HEART);
+        cardList.get(3).setType(Card.TypeCard.HEART);
+        cardList.get(4).setType(Card.TypeCard.CLUBS);
+
+        assertTrue(serverTest.hasAsset(cardList, Card.TypeCard.CLUBS));
+        assertTrue(!serverTest.hasAsset(cardList, Card.TypeCard.DIAMOND));
+    }
 }
 
 
