@@ -10,10 +10,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 
 @Controller
@@ -224,23 +221,30 @@ public class Server {
     }
 
     public static Boolean checkValidity(Room myRoom, Player player, List<Card> fold, Card card) {
-        if (!checkCardExists(player.getCards(), card))
+        if (checkCardExists(player.getCards(), card) == false)
             return false;
         if (fold.size() == 0) {
             return true;
         }
 
-        /*if (compareColor(card, fold.get(fold.size() - 1)))
+        if (compareColor(card, fold.get(fold.size() - 1)))
             return true;
         if (isAsset(card, myRoom.getBoard().getAsset().getType()))
             return true;
-        if (!hasAsset(player.getCards(), myRoom.getBoard().getAsset().getType()))
-            return true;*/
+        if (hasAsset(player.getCards(), myRoom.getBoard().getAsset().getType()) == false)
+            return true;
         return true;
     }
     public static void exchangeCards(Room myRoom, Player player, Card card) {
         myRoom.getBoard().getFold().add(card);
-        player.getCards().remove(card);
+        for (int i = 0; i < player.getCards().size(); i++) {
+            System.out.println("BEFORE["+i+"] Type:"+player.getCards().get(i).getType()+" and Value"+player.getCards().get(i).getValue());
+        }
+        for (int j = 0; j < player.getCards().size(); j++) {
+            if (player.getCards().get(j).getType().equals(card.getType()) == true && player.getCards().get(j).getValue().equals(card.getValue()) == true) {
+                player.getCards().remove(j);
+            }
+        }
         for (int i = 0; i < player.getCards().size(); i++) {
             System.out.println(i+" Type:"+player.getCards().get(i).getType()+" and Value"+player.getCards().get(i).getValue());
         }
@@ -303,7 +307,7 @@ public class Server {
                 if (isAsset(fold.get(i), asset)) {
                     max = i;
                 }
-                if (fold.get(i).getType() == firstCard.getType() && !isAsset(fold.get(max), asset)) {
+                if (fold.get(i).getType().equals(firstCard.getType()) == true && !isAsset(fold.get(max), asset)) {
                     max = i;
                 }
             }
