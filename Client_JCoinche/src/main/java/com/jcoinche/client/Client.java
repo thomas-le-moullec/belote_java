@@ -264,6 +264,12 @@ public class Client {
             e.printStackTrace();
         }
         setPrompt(false);
+        //pushCardOnBoard(response)
+    }
+
+    public void pushCardOnBoard(String response) {
+        //split -
+        //stompSession.send("/app/jcoinche/putCard/" + getIdClient(), CARD);
     }
 
     public void getBoard() {
