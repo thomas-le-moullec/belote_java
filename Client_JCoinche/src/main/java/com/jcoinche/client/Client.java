@@ -89,8 +89,6 @@ public class Client {
 
     public void setCards(List<Card> cards) {
         this.cards = cards;
-        displayCards();
-        //Display Cards to User.
     }
 
     public String getIdClient() {
@@ -157,7 +155,12 @@ public class Client {
                     if (((ProtoTask) payload).getTask() == ProtoTask.Protocol.PUTCARD) {
                         System.out.println("GO IN Put Card\n");
                         getBoard();
-                        putCard();
+                        getPlayer();
+                        //putCard();
+                    }
+                    if (((ProtoTask) payload).getTask() == ProtoTask.Protocol.END) {
+                        endGame();
+                        //Quit Server and disconnect clients
                     }
                 }
             }
@@ -237,6 +240,51 @@ public class Client {
 
     /*
     *
+    * Sub to /EndGame/{id} to get the asset
+    * */
+    public void subscribeEndGame() throws ExecutionException, InterruptedException {
+        getStompSession().subscribe("/topic/endGame/", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return ScoreBoard.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                if (payload instanceof ScoreBoard) {
+                    //affichage win;
+                    System.out.println("Team "+((ScoreBoard)payload).getTeamWin()+" win with "+((ScoreBoard)payload).getScores().get(0)+" vs "+((ScoreBoard)payload).getScores().get(1));
+                }
+            }
+        });
+    }
+
+    /*
+    *
+    * Sub to /getPlayer/{id} to receive cards during distribution
+    * */
+    public void subscribeGetPlayer() throws ExecutionException, InterruptedException {
+        getStompSession().subscribe("/topic/getPlayer/" + getIdClient(), new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return Player.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                if (payload instanceof Player) {
+                    setCards(((Player) payload).getCards());
+                    for (int i = 0; i < ((Player) payload).getCards().size(); i++) {
+                        System.out.println("---> Card [" + i + "] = " + ((Player) payload).getCards().get(i).getType() + " - " + ((Player) payload).getCards().get(i).getValue());
+                    }
+                    putCard();
+                }
+            }
+        });
+    }
+
+    /*
+    *
     * Sub to /takeCards/{id} to receive cards during distribution
     * */
     public void subscribePlayerCards() throws ExecutionException, InterruptedException {
@@ -279,11 +327,20 @@ public class Client {
         }
     }
 
+    public void getPlayer() {
+        stompSession.send("/app/jcoinche/getPlayer/" + getIdClient(), null);
+    }
+
+    public void endGame() {
+        stompSession.send("/app/jcoinche/endGame/" + getIdClient(), null);
+    }
+
     public void putCard() {
         setPrompt(true);
         String response;
-        displayBoard();
         try {
+            displayCards();
+            displayBoard();
             response = getInfosFromUser("Which card do you want to put ? \n$>");
         } catch (IOException e) {
             response = "";
@@ -399,6 +456,8 @@ public class Client {
             subscribeGetAsset();
             subscribeBoard();
             subscribePutCard();
+            subscribeGetPlayer();
+            subscribeEndGame();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -409,17 +468,17 @@ public class Client {
     }
 
     public void displayBoard() {
-     /*   System.out.println("########################### FOLD ###########################");
+        System.out.println("########################### FOLD ###########################");
         for (int i = 0; i < getFold().size(); i++) {
             System.out.println("......"+getFold().get(i).getType()+"..."+getFold().get(i).getValue()+"...");
         }
         System.out.println("------------------------------------------------------------");
         displayCards();
-        displayAsset();*/
-
+        displayAsset();
     }
 
     public void displayCards() {
+        System.out.println("########################### YOUR CARDS ###########################");
         for (int i = 0; i < cards.size(); i++) {
             System.out.println("---> Card [" + i + "] = " + cards.get(i).getType() + " - " + cards.get(i).getValue());
         }

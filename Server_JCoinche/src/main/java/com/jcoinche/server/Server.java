@@ -30,6 +30,39 @@ public class Server {
         return new Greeting("Hello, " + message.getName() + "!");
     }
 
+    @MessageMapping("/jcoinche/endGame/{id}")
+    @SendTo("/topic/endGame/{id}")
+    public ScoreBoard endGame(@DestinationVariable("id") String id) throws Exception {
+
+        int teamWin;
+        int scorePlayer0;
+        int scorePlayer1;
+        int scorePlayer2;
+        int scorePlayer3;
+
+        scorePlayer0 = getRoomOfPlayer(id).getPlayers().get(0).getScore();
+        scorePlayer1 = getRoomOfPlayer(id).getPlayers().get(1).getScore();
+        scorePlayer2 = getRoomOfPlayer(id).getPlayers().get(2).getScore();
+        scorePlayer3 = getRoomOfPlayer(id).getPlayers().get(3).getScore();
+        if (scorePlayer0+scorePlayer2 < scorePlayer1+scorePlayer3) {
+            teamWin = 1;
+        }
+        else {
+            teamWin = 0;
+        }
+        return new ScoreBoard(scorePlayer0+scorePlayer2, scorePlayer1+scorePlayer3, teamWin);
+    }
+
+    @MessageMapping("/jcoinche/getPlayer/{id}")
+    @SendTo("/topic/getPlayer/{id}")
+    public Player getCards(@DestinationVariable("id") String id) throws Exception {
+        //getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.GETPLAYER);
+        for (int i = 0; i < getRoomOfPlayer(id).getPlayer(id).getCards().size(); i++) {
+            System.out.println("Card TYPE:"+getRoomOfPlayer(id).getPlayer(id).getCards().get(i).getType()+ "VALUE:"+getRoomOfPlayer(id).getPlayer(id).getCards().get(i).getValue());
+        }
+        return getRoomOfPlayer(id).getPlayer(id);
+    }
+
     @MessageMapping("/jcoinche/board/{id}")
     @SendTo("/topic/board/{id}")
     public Board greeting(@DestinationVariable("id") String id) throws Exception {
@@ -67,7 +100,7 @@ public class Server {
             getRoomOfPlayer(id).setAssetTaker(id);
             for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
                 getRoomOfPlayer(id).getPlayers().get(i).setTask(ProtoTask.Protocol.WAIT);
-                distributeCards(getRoomOfPlayer(id), getRoomOfPlayer(id).getPlayer(id), 3);
+                distributeCards(getRoomOfPlayer(id), getRoomOfPlayer(id).getPlayers().get(i), 3);
             }
             getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.PUTCARD);
             System.out.println("Id PLAYER WHEN GET TAKEASSET:"+getRoomOfPlayer(id).getPlayers().get(0).getId()+" task:"+getRoomOfPlayer(id).getPlayers().get(0).getTask());
@@ -103,12 +136,25 @@ public class Server {
         }
         getRoomOfPlayer(id).setPlays(getRoomOfPlayer(id).getPlays() + 1);
         exchangeCards(myRoom, player, card);
+        int index = 0;
         if (getRoomOfPlayer(id).getPlays() == 4) {
             getRoomOfPlayer(id).setPlays(0);
+            index = getRoomOfPlayer(id).getPlayers().indexOf(countFoldScore(id));
             System.out.println("END OF FOLD !\n\n\n");
         }
-        getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.WAIT);
-        int index = getRoomOfPlayer(id).getPlayers().indexOf(getRoomOfPlayer(id).getPlayer(id));
+        else {
+            index = getRoomOfPlayer(id).getPlayers().indexOf(getRoomOfPlayer(id).getPlayer(id));
+        }
+        if (getRoomOfPlayer(id).getBoard().getPick().isEmpty() == true) {
+            for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
+                getRoomOfPlayer(id).getPlayers().get(i).setTask(ProtoTask.Protocol.END);
+
+                return new PutCard(true);
+            }
+        }
+        for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
+            getRoomOfPlayer(id).getPlayers().get(i).setTask(ProtoTask.Protocol.WAIT);
+        }
         getRoomOfPlayer(id).getPlayers().get((index + 1)%4).setTask(ProtoTask.Protocol.PUTCARD);
         getRoomOfPlayer(id).setIdTurn(getRoomOfPlayer(id).getPlayers().get((index + 1)%4).getId());
         System.out.println("VALID CARD\n");
@@ -137,6 +183,7 @@ public class Server {
                     distributeCards(rooms.get(rooms.size() - 1), rooms.get(rooms.size() - 1).getPlayers().get(i), 5);
                 }
                 rooms.get(rooms.size() - 1).getBoard().setAsset(rooms.get(rooms.size() - 1).getBoard().getPick().get(new Random().nextInt(rooms.get(rooms.size() - 1).getBoard().getPick().size())));
+                rooms.get(rooms.size() - 1).getBoard().getPick().remove(rooms.get(rooms.size() - 1).getBoard().getPick().indexOf(rooms.get(rooms.size() - 1).getBoard().getAsset()));
                 for (int i = 0; i < 4; i++) {
                     rooms.get(rooms.size() - 1).getPlayers().get(i).setTask(ProtoTask.Protocol.TAKECARD);
                 }
@@ -163,8 +210,8 @@ public class Server {
 
     public static Boolean checkCardExists(List<Card> cardList, Card card) {
         for (int i = 0; i < cardList.size(); i++) {
-            if (cardList.get(i).getType() == card.getType() &&
-                    cardList.get(i).getValue() == card.getValue())
+            if (cardList.get(i).getType().equals(card.getType()) ==  true &&
+                    cardList.get(i).getValue().equals(card.getValue()) == true)
                 return true;
         }
         return false;
@@ -225,22 +272,6 @@ public class Server {
             }
         }
     }
-
-/*    public void distributeCards(Room myRoom, int x) throws Exception {
-        int index;
-
-        System.out.println("ROOM.GET_PLAYER.SIZE()="+myRoom.getPlayers().size());
-        System.out.println("ROOM.PICK_SIZE()="+myRoom.getBoard().getPick().size());
-        System.out.println("ROOM.GETPLAYERS_SIZE="+myRoom.getPlayers().size());
-
-        for (int tour = 0; tour < x; tour++) {
-            for (int i = 0; i < myRoom.getPlayers().size(); i++) {
-                index = new Random().nextInt(myRoom.getBoard().getPick().size());
-                myRoom.getPlayers().get(i).getCards().add(myRoom.getBoard().getPick().get(index));
-                myRoom.getBoard().getPick().remove(index);
-            }
-        }
-    }*/
 
     public static int determineFoldWinner(List<Card> fold, Card firstCard, Card.TypeCard asset, Map<String, Integer> valueAsset, Map<String, Integer> valueNonAsset) {
         int max;

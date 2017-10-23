@@ -52,7 +52,7 @@ public class Board {
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 8; j++) {
-                System.out.println("TypeCard:"+typeCard.get(i)+ "Value :"+getOrderCard().get(j));
+                //System.out.println("TypeCard:"+typeCard.get(i)+ "Value :"+getOrderCard().get(j));
                 pick.add(new Card(typeCard.get(i), getOrderCard().get(j), 0));
             }
         }
