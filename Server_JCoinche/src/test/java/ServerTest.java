@@ -160,6 +160,11 @@ public class ServerTest {
         ret = serverTest.determineFoldWinner(fold, firstCard, Card.TypeCard.HEART, new Board().getValueCardAsset(), new Board().getValueCard());
         assertTrue(ret == 1);
     }
+
+    @Test
+    public void countFoldScore() {
+
+    }
 }
 
 /*
