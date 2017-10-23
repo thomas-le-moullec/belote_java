@@ -4,10 +4,12 @@ import com.jcoinche.model.Player;
 import com.jcoinche.model.Room;
 import com.jcoinche.server.Server;
 import org.junit.Test;
+import org.mockito.cglib.beans.BeanMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.*;
@@ -140,56 +142,27 @@ public class ServerTest {
 
         serverTest.distributeCards(room);
 
-        assertTrue("------------->"+room.getPlayers().size(), room.getPlayers().get(0).getCards().get(0).getType() == Card.TypeCard.CLUBS);
+        assertTrue(room.getPlayers().get(0).getCards().get(0).getType() == Card.TypeCard.CLUBS);
+    }
+
+    @Test
+    public void determineFoldWinnerTest() {
+        List<Card> fold = new ArrayList<>();
+        Card firstCard = new Card(Card.TypeCard.CLUBS, "K", 0);
+        Map<String, Integer> valueAsset = new Board().getValueCardAsset();
+        int ret;
+
+        fold.add(new Card(Card.TypeCard.CLUBS, "K", 0));
+        fold.add(new Card(Card.TypeCard.HEART, "Q", 0));
+        fold.add(new Card(Card.TypeCard.DIAMOND, "V", 0));
+        fold.add(new Card(Card.TypeCard.SPADES, "A", 0));
+
+        ret = serverTest.determineFoldWinner(fold, firstCard, Card.TypeCard.HEART, new Board().getValueCardAsset(), new Board().getValueCard());
+        assertTrue(ret == 1);
     }
 }
 
 /*
-
-    @MessageMapping("/jcoinche/distributeCards/{id}")
-    @SendTo("/topic/users/{id}")
-    public void distributeCards(room) throws Exception {
-        Room myRoom = getRoomOfPlayer(id);
-        int index;
-
-        for (int tour = 0; tour < 5; tour++) {
-            for (int i = 0; i < myRoom.getPlayers().size(); i++) {
-                index = new Random().nextInt(myRoom.getBoard().getPick().size());
-                myRoom.getPlayers().get(i).getCards().add(myRoom.getBoard().getPick().get(index));
-                myRoom.getBoard().getPick().remove(index);
-            }
-        }
-        System.out.println();
-    }
-
-    public static int determineFoldWinner(List<Card> fold, Card firstCard, Card.TypeCard asset, Map<String, Integer> valueAsset, Map<String, Integer> valueNonAsset) {
-        int max;
-
-        max = 0;
-        for (int i = 1; i < fold.size(); i++) {
-            if (compareColor(fold.get(i), fold.get(max))) {
-                if (isAsset(firstCard, asset)) {
-                    if (valueAsset.get(fold.get(i).getValue()) > valueAsset.get(fold.get(max).getValue())) {
-                        max = i;
-                    }
-                }
-                else {
-                    if (valueNonAsset.get(fold.get(i).getValue()) > valueNonAsset.get(fold.get(max).getValue())) {
-                        max = i;
-                    }
-                }
-            }
-            else {
-                if (isAsset(fold.get(i), asset)) {
-                    max = i;
-                }
-                if (fold.get(i).getType() == firstCard.getType() && !isAsset(fold.get(max), asset)) {
-                    max = i;
-                }
-            }
-        }
-        return max;
-    }
 
     @MessageMapping("/jcoinche/countFoldScore/{id}")
     @SendTo("/topic/users/{id}")
