@@ -40,14 +40,20 @@ public class Client {
     private List<Card> cards;
     private ProtoTask.Protocol task;
     private Card asset;
+    private boolean prompt;
 
     public Client(String url, int port) throws Exception {
         {
-            ListenableFuture<StompSession> f = this.connect();
+            setPrompt(false);
+            ListenableFuture<StompSession> f = this.connect(url, port);
             setStompSession(f.get());
             suscribeTo();
             setTask(ProtoTask.Protocol.WAIT);
         }
+    }
+
+    public void setPrompt(boolean prompt) {
+        this.prompt = prompt;
     }
 
     public void setAsset(Card asset) {
@@ -56,6 +62,10 @@ public class Client {
 
     public Card getAsset() {
         return asset;
+    }
+
+    public boolean getPrompt() {
+        return prompt;
     }
 
     public ProtoTask.Protocol getTask() {
@@ -72,7 +82,7 @@ public class Client {
 
     public void setCards(List<Card> cards) {
         this.cards = cards;
-        //Display Cards to User.
+        displayCards();
     }
 
     public String getIdClient() {
@@ -105,7 +115,7 @@ public class Client {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 if (payload instanceof Greeting) {
-                    System.out.println("Greeting Response :" + ((Greeting) payload).getContent());
+                    System.out.println("HandShake Success :" +((Greeting) payload).getContent());
                     runProgTask();
                 }
             }
@@ -126,7 +136,7 @@ public class Client {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 if (payload instanceof ProtoTask) {
-                    System.out.println(((ProtoTask) payload).getTask());
+                    System.out.println("TASK TO DO:"+((ProtoTask) payload).getTask());
                     setTask(((ProtoTask) payload).getTask());
                     if (((ProtoTask) payload).getTask() == ProtoTask.Protocol.TAKECARD) {
                         System.out.println("GO IN TAKE CARDS\n");
@@ -147,7 +157,7 @@ public class Client {
     * Sub to /getAsset/{id} to get the asset
     * */
     public void subscribeGetAsset() throws ExecutionException, InterruptedException {
-        getStompSession().subscribe("/topic/getAsset/", new StompFrameHandler() {
+        getStompSession().subscribe("/topic/getAsset/"+getIdClient(), new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return Card.class;
@@ -159,6 +169,11 @@ public class Client {
                 if (payload instanceof Card) {
                     System.out.println("WE RECEIVED A CARD IN GET ASSET");
                     setAsset((Card) payload);
+                    try {
+                        choseAsset(getAsset());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -185,25 +200,27 @@ public class Client {
         });
     }
 
-    public ListenableFuture<StompSession> connect() {
+    public ListenableFuture<StompSession> connect(String urlCo, int port) {
         WebSocketClient webSocketClient = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         stompClient.setTaskScheduler(new ConcurrentTaskScheduler());
 
         String url = "ws://{host}:{port}/";
-        return stompClient.connect(url, headers, new MyHandler(), "localhost", 8080);
+        return stompClient.connect(url, headers, new MyHandler(), urlCo, port);
     }
 
     public void greeting(StompSession stompSession, String name) {
         String jsonHello = "{\"name\" : \"" + name + "\" }";
-        System.out.print("Name entered :" + jsonHello);//debug
+        System.out.print("ID: "+getIdClient()+" Name entered :" + jsonHello);//debug
         stompSession.send("/app/jcoinche/greeting/" + getIdClient(), jsonHello.getBytes());
     }
 
     public void askForTask(StompSession stompSession) {
-        System.out.print("ID is sending message:" + getIdClient() + "\n");//debug
-        stompSession.send("/app/jcoinche/askForTask/" + getIdClient(), null);
+        if (getPrompt() == false) {
+            System.out.print("ID is sending message:" + getIdClient() + "\n");//debug
+            stompSession.send("/app/jcoinche/askForTask/" + getIdClient(), null);
+        }
     }
 
     public void takeCards() {
@@ -216,7 +233,9 @@ public class Client {
 
     public void choseAsset(Card asset) throws IOException {
         {
+            setPrompt(true);
             String response = getInfosFromUser("Do you want the asset : " + asset.getType() + " - " + asset.getValue() + " ? Y/N");
+            setPrompt(false);
             if (response.equals("Y") == true || response.equals("Yes") == true) {
                 cards.add(getAsset());
                 getStompSession().send("/app/jcoinche/takeAsset/" + getIdClient(), response);
@@ -230,6 +249,7 @@ public class Client {
     private class MyHandler extends StompSessionHandlerAdapter {
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
             setIdClient(stompSession.getSessionId().toString());
+            System.out.println("ID OF CONNECTION AFTER CONNECTED:"+getIdClient());
         }
     }
 
@@ -259,20 +279,25 @@ public class Client {
         Timer time = new Timer(); // Instantiate Timer Object
 
         time.schedule(new CustomTask(client), 0, TimeUnit.SECONDS.toMillis(1));
-
     }
 
     public void suscribeTo() throws Exception {
         {
             subscribeUser();
-            subscribeInfos();
-            subscribePlayerCards();
-            subscribeGetAsset();
         }
     }
 
     public void runProgTask() {
         //run TimerTask every second;
+        try {
+            subscribeInfos();
+            subscribePlayerCards();
+            subscribeGetAsset();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         System.out.println("RUN PROG TASK");
         this.runTask(this);
     }
@@ -294,16 +319,7 @@ public class Client {
             port = Integer.parseInt(args[0]);
         }
         Client client = new Client(url, port);
-        logger.info("Subscribing to greeting topic using session " + client.getStompSession());
-        //String userName = client.getInfosFromUser("What is your name ?");
         client.greeting(client.getStompSession(), "guest");
-        /*while (client.getTask() != ProtoTask.Protocol.END) {
-            if (client.getTask() != ProtoTask.Protocol.WAIT)
-                client.displayCards();
-            if (client.getTask() == ProtoTask.Protocol.GETASSET) {
-                client.choseAsset(client.getAsset());
-            }
-        }*/
         //Timer for QUIT Client
         Thread.sleep(180000);
     }
