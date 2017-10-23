@@ -1,7 +1,7 @@
 package com.jcoinche.model;
 
 public class ProtoTask {
-    public enum Protocol {WAIT, TAKECARD, GETASSET, PUTCARD, END};
+    public enum Protocol {WAIT, TAKECARD, GETASSET, PUTCARD, GETPLAYER, END};
     private Protocol task;
 
     public ProtoTask() {
