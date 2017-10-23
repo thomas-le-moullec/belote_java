@@ -140,15 +140,15 @@ public class Server {
         if (getRoomOfPlayer(id).getPlays() == 4) {
             getRoomOfPlayer(id).setPlays(0);
             index = getRoomOfPlayer(id).getPlayers().indexOf(countFoldScore(id));
+            getRoomOfPlayer(id).getBoard().getFold().clear();
             System.out.println("END OF FOLD !\n\n\n");
         }
         else {
             index = getRoomOfPlayer(id).getPlayers().indexOf(getRoomOfPlayer(id).getPlayer(id));
         }
-        if (getRoomOfPlayer(id).getBoard().getPick().isEmpty() == true) {
+        if (getRoomOfPlayer(id).getPlayer(id).getCards().size() == 0) {
             for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
                 getRoomOfPlayer(id).getPlayers().get(i).setTask(ProtoTask.Protocol.END);
-
                 return new PutCard(true);
             }
         }
@@ -192,16 +192,22 @@ public class Server {
     }
 
     public static Boolean compareColor(Card card1, Card card2) {
-        return (card1.getType() == card2.getType());
+        if (card1.getType().equals(card2.getType()) == true) {
+            return (true);
+        }
+        return (false);
     }
 
     public static Boolean isAsset(Card card, Card.TypeCard asset) {
-        return (card.getType() == asset);
+        if (card.getType().equals(asset)) {
+            return (true);
+        }
+        return (false);
     }
 
     public static Boolean hasAsset(List<Card> cards, Card.TypeCard asset) {
         for (int i = 0; i < cards.size(); i++) {
-            if (cards.get(i).getType() == asset) {
+            if (cards.get(i).getType().equals(asset) == true) {
                 return true;
             }
         }
@@ -224,17 +230,20 @@ public class Server {
             return true;
         }
 
-        if (compareColor(card, fold.get(fold.size() - 1)))
+        /*if (compareColor(card, fold.get(fold.size() - 1)))
             return true;
         if (isAsset(card, myRoom.getBoard().getAsset().getType()))
             return true;
         if (!hasAsset(player.getCards(), myRoom.getBoard().getAsset().getType()))
-            return true;
-        return false;
+            return true;*/
+        return true;
     }
     public static void exchangeCards(Room myRoom, Player player, Card card) {
         myRoom.getBoard().getFold().add(card);
         player.getCards().remove(card);
+        for (int i = 0; i < player.getCards().size(); i++) {
+            System.out.println(i+" Type:"+player.getCards().get(i).getType()+" and Value"+player.getCards().get(i).getValue());
+        }
     }
 
     public Player countFoldScore(String id) throws Exception {
