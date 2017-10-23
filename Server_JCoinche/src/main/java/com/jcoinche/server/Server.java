@@ -37,6 +37,7 @@ public class Server {
         Player player = getRoomOfPlayer(id).getPlayer(id);
         getRoomOfPlayer(id).setPlays(getRoomOfPlayer(id).getPlays() + 1);
         if (getRoomOfPlayer(id).getPlays() == 4) {
+            getRoomOfPlayer(id).setIdTurn(id);
             getRoomOfPlayer(id).getPlayers().get(0).setTask(ProtoTask.Protocol.GETASSET);
             getRoomOfPlayer(id).getPlayers().get(1).setTask(ProtoTask.Protocol.WAIT);
             getRoomOfPlayer(id).getPlayers().get(2).setTask(ProtoTask.Protocol.WAIT);
@@ -48,10 +49,25 @@ public class Server {
         return player;
     }
 
+    @MessageMapping("/jcoinche/takeAsset/{id}")
+    public void takeAsset(@DestinationVariable("id") String id, String response) throws Exception {
+        System.out.print("Id User =>"+id+" answered to take asset, response:"+response+"\n");
+        if (response.equals("Yes") || response.equals("Y")) {
+            getRoomOfPlayer(id).setAssetTaker(id);
+            for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
+                getRoomOfPlayer(id).getPlayers().get(i).setTask(ProtoTask.Protocol.WAIT);
+            }
+        }
+        else {
+            getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.WAIT);
+            int index = getRoomOfPlayer(id).getPlayers().indexOf(getRoomOfPlayer(id).getPlayer(id));
+            getRoomOfPlayer(id).getPlayers().get(index + 1).setTask(ProtoTask.Protocol.GETASSET);
+        }
+    }
+
     @MessageMapping("/jcoinche/getAsset/{id}")
-    @SendTo("/topic/getAsset/{id}")
+    @SendTo("/topic/getAsset/")
     public Card getAsset(@DestinationVariable("id") String id) throws Exception {
-        //Conditions to determine what to do.
         System.out.print("Id User =>"+id+" is IN GET ASSET !!! \n");
         return getRoomOfPlayer(id).getBoard().getAsset();
     }
@@ -86,12 +102,13 @@ public class Server {
         {
             Player newPlayer = new Player(id, new ArrayList<Card>(), 0, 0, ProtoTask.Protocol.WAIT);
             if (rooms.size() == 0 || rooms.get(rooms.size() - 1).getPlayers().size() == 4) {
-                rooms.add(new Room(rooms.size(), new ArrayList<Player>(), new Board(), 0));
+                rooms.add(new Room(rooms.size(), new ArrayList<Player>(), new Board(), ""));
             }
             newPlayer.setTeam((rooms.size() - 1) % 2);
             rooms.get(rooms.size() - 1).getPlayers().add(newPlayer);
             if (rooms.get(rooms.size() - 1).getPlayers().size() == 4) {
                 distributeCards(rooms.get(rooms.size() - 1), 5);
+                rooms.get(rooms.size() - 1).getBoard().setAsset(rooms.get(rooms.size() - 1).getBoard().getPick().get(new Random().nextInt(rooms.get(rooms.size() - 1).getBoard().getPick().size())));
                 for (int i = 0; i < 4; i++) {
                     rooms.get(rooms.size() - 1).getPlayers().get(i).setTask(ProtoTask.Protocol.TAKECARD);
                 }
@@ -223,7 +240,7 @@ public class Server {
 
     public Server() {
         rooms = new ArrayList<Room>();
-        rooms.add(new Room(rooms.size(), new ArrayList<Player>(), new Board(), 0));
+        rooms.add(new Room(rooms.size(), new ArrayList<Player>(), new Board(), ""));
     }
 
     public List<Room> getRooms() {

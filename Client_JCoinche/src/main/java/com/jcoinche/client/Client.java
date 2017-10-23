@@ -105,7 +105,7 @@ public class Client {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 if (payload instanceof Greeting) {
-                    System.out.println("Greeting Response :"+((Greeting) payload).getContent());
+                    System.out.println("Greeting Response :" + ((Greeting) payload).getContent());
                     runProgTask();
                 }
             }
@@ -147,7 +147,7 @@ public class Client {
     * Sub to /getAsset/{id} to get the asset
     * */
     public void subscribeGetAsset() throws ExecutionException, InterruptedException {
-        getStompSession().subscribe("/topic/getAsset/" + getIdClient(), new StompFrameHandler() {
+        getStompSession().subscribe("/topic/getAsset/", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return Card.class;
@@ -158,7 +158,7 @@ public class Client {
                 //System.out.println("RECEIVED IN HANDLEFRAME");
                 if (payload instanceof Card) {
                     System.out.println("WE RECEIVED A CARD IN GET ASSET");
-                    setAsset((Card)payload);
+                    setAsset((Card) payload);
                 }
             }
         });
@@ -178,7 +178,7 @@ public class Client {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 if (payload instanceof Player) {
-                    System.out.println("Cards from handle :"+((Player) payload).getCards());
+                    System.out.println("Cards from handle :" + ((Player) payload).getCards());
                     setCards(((Player) payload).getCards());
                 }
             }
@@ -196,27 +196,34 @@ public class Client {
     }
 
     public void greeting(StompSession stompSession, String name) {
-        String jsonHello = "{\"name\" : \""+name+"\" }";
-        System.out.print("Name entered :"+jsonHello);//debug
-        stompSession.send("/app/jcoinche/greeting/"+getIdClient(), jsonHello.getBytes());
+        String jsonHello = "{\"name\" : \"" + name + "\" }";
+        System.out.print("Name entered :" + jsonHello);//debug
+        stompSession.send("/app/jcoinche/greeting/" + getIdClient(), jsonHello.getBytes());
     }
 
     public void askForTask(StompSession stompSession) {
-        System.out.print("ID is sending message:"+getIdClient()+"\n");//debug
-        stompSession.send("/app/jcoinche/askForTask/"+getIdClient(), null);
+        System.out.print("ID is sending message:" + getIdClient() + "\n");//debug
+        stompSession.send("/app/jcoinche/askForTask/" + getIdClient(), null);
     }
 
     public void takeCards() {
-        getStompSession().send("/app/jcoinche/takeCards/"+getIdClient(), null);
+        getStompSession().send("/app/jcoinche/takeCards/" + getIdClient(), null);
     }
 
     public void takeAsset() {
-        getStompSession().send("/app/jcoinche/getAsset/"+getIdClient(), null);
+        getStompSession().send("/app/jcoinche/getAsset/" + getIdClient(), null);
     }
 
     public void choseAsset(Card asset) throws IOException {
         {
-            String response = getInfosFromUser("Do you want the asset ? Y/N");
+            String response = getInfosFromUser("Do you want the asset : " + asset.getType() + " - " + asset.getValue() + " ? Y/N");
+            if (response.equals("Y") == true || response.equals("Yes") == true) {
+                cards.add(getAsset());
+                getStompSession().send("/app/jcoinche/takeAsset/" + getIdClient(), response);
+            }
+            else {
+                getStompSession().send("/app/jcoinche/takeAsset/" + getIdClient(), response);
+            }
         }
     }
 
@@ -226,32 +233,33 @@ public class Client {
         }
     }
 
-    static boolean isInt(String s)
-    {
-        try
-        { int i = Integer.parseInt(s); return true; }
-
-        catch(NumberFormatException er)
-        { return false; }
+    static boolean isInt(String s) {
+        try {
+            int i = Integer.parseInt(s);
+            return true;
+        } catch (NumberFormatException er) {
+            return false;
+        }
     }
 
     public String getInfosFromUser(String question) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        for (;;) {
+        for (; ; ) {
             System.out.print(question + "\n");
             System.out.flush();
             String line = in.readLine();
-            if ( line == null ) break;
-            if ( line.length() == 0 ) continue;
+            if (line == null) break;
+            if (line.length() == 0) continue;
             return line;
         }
         return "";
     }
 
-    public void runTask(Client client){
+    public void runTask(Client client) {
         Timer time = new Timer(); // Instantiate Timer Object
 
         time.schedule(new CustomTask(client), 0, TimeUnit.SECONDS.toMillis(1));
+
     }
 
     public void suscribeTo() throws Exception {
@@ -269,6 +277,12 @@ public class Client {
         this.runTask(this);
     }
 
+    public void displayCards() {
+        for (int i = 0; i < cards.size(); i++) {
+            System.out.println("---> Card [" + i + "] = " + cards.get(i).getType() + " - " + cards.get(i).getValue());
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         String url = "localhost";
         int port = 8080;
@@ -280,16 +294,17 @@ public class Client {
             port = Integer.parseInt(args[0]);
         }
         Client client = new Client(url, port);
-
         logger.info("Subscribing to greeting topic using session " + client.getStompSession());
         //String userName = client.getInfosFromUser("What is your name ?");
         client.greeting(client.getStompSession(), "guest");
-        while (client.getTask() != ProtoTask.Protocol.END) {
+        /*while (client.getTask() != ProtoTask.Protocol.END) {
+            if (client.getTask() != ProtoTask.Protocol.WAIT)
+                client.displayCards();
             if (client.getTask() == ProtoTask.Protocol.GETASSET) {
                 client.choseAsset(client.getAsset());
             }
-        }
-        //Timer for AFK
+        }*/
+        //Timer for QUIT Client
         Thread.sleep(180000);
     }
 }

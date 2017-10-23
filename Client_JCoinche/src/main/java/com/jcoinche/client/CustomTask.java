@@ -1,5 +1,7 @@
 package com.jcoinche.client;
 
+import com.jcoinche.model.ProtoTask;
+
 import java.util.TimerTask;
 
 public class CustomTask extends TimerTask {
@@ -16,6 +18,11 @@ public class CustomTask extends TimerTask {
         try {
 
             client.askForTask(client.getStompSession());
+            if (client.getTask() != ProtoTask.Protocol.WAIT)
+                client.displayCards();
+            if (client.getTask() == ProtoTask.Protocol.GETASSET) {
+                client.choseAsset(client.getAsset());
+            }
             // Your task process
 
         } catch (Exception ex) {

@@ -8,15 +8,15 @@ import java.util.Map;
 public class Room {
     private int id;
     private List<Player> players;
-    private int idTurn;
+    private String idTurn;
     private Board board;
-    private int assetTaker;
+    private String assetTaker;
     private int plays = 0;
 
     public Room() {
     }
 
-    public Room(int id, List<Player> players, Board board, int assetTaker) {
+    public Room(int id, List<Player> players, Board board, String assetTaker) {
         this.id = id;
         this.players = players;
         this.board = board;
@@ -32,11 +32,11 @@ public class Room {
         this.plays = plays;
     }
 
-    public void setIdTurn(int idTurn) {
+    public void setIdTurn(String idTurn) {
         this.idTurn = idTurn;
     }
 
-    public int getIdTurn() {
+    public String getIdTurn() {
         return idTurn;
     }
 
@@ -73,11 +73,11 @@ public class Room {
         this.board = board;
     }
 
-    public int getAssetTaker() {
+    public String getAssetTaker() {
         return assetTaker;
     }
 
-    public void setAssetTaker(int assetTaker) {
+    public void setAssetTaker(String assetTaker) {
         this.assetTaker = assetTaker;
     }
 }
