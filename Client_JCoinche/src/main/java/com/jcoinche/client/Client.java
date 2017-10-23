@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.util.SystemPropertyUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.WebSocketClient;
@@ -281,18 +282,39 @@ public class Client {
 
     public void putCard() {
         setPrompt(true);
-        //Display Board
+        String response;
+        displayBoard();
         try {
-            String response = getInfosFromUser("Which card do you want to put ? \n$>");
+            response = getInfosFromUser("Which card do you want to put ? \n$>");
         } catch (IOException e) {
+            response = "";
             e.printStackTrace();
         }
         setPrompt(false);
-        //pushCardOnBoard(response)
+        pushCardOnBoard(response);
     }
 
     public void pushCardOnBoard(String response) {
-        //split -
+        Card card = new Card();
+        String[] infos = response.split("-");
+
+        if (infos[0] == null) {
+            System.out.println("ERROR - please respect the following syntaxe : [TYPE]-[VALUE]");
+        }
+        if (infos[1] == null) {
+            System.out.println("ERROR - please respect the following syntaxe : [TYPE]-[VALUE]");
+        }
+        if (infos[0].equals("HEART"))
+            card.setType(Card.TypeCard.HEART);
+        if (infos[0].equals("SPADES"))
+            card.setType(Card.TypeCard.SPADES);
+        if (infos[0].equals("CLUBS"))
+            card.setType(Card.TypeCard.CLUBS);
+        if (infos[0].equals("DIAMOND"))
+            card.setType(Card.TypeCard.DIAMOND);
+        card.setValue(infos[1]);
+        System.out.println("*************TYPE ="+card.getType());
+        System.out.println("*************VALUE="+card.getValue());
         //stompSession.send("/app/jcoinche/putCard/" + getIdClient(), CARD);
     }
 
@@ -380,6 +402,17 @@ public class Client {
         }
         System.out.println("RUN PROG TASK");
         this.runTask(this);
+    }
+
+    public void displayBoard() {
+     /*   System.out.println("########################### FOLD ###########################");
+        for (int i = 0; i < getFold().size(); i++) {
+            System.out.println("......"+getFold().get(i).getType()+"..."+getFold().get(i).getValue()+"...");
+        }
+        System.out.println("------------------------------------------------------------");
+        displayCards();
+        displayAsset();*/
+
     }
 
     public void displayCards() {
