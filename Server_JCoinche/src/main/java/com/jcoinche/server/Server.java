@@ -164,7 +164,7 @@ public class Server {
         player.getCards().remove(card);
     }
 
-    public int countFoldScore(String id) throws Exception {
+    public Player countFoldScore(String id) throws Exception {
         int index = determineFoldWinner(getRoomOfPlayer(id).getBoard().getFold(),
                 getRoomOfPlayer(id).getBoard().getFold().get(0),
                 getRoomOfPlayer(id).getBoard().getAsset().getType(),
@@ -182,7 +182,7 @@ public class Server {
             }
         }
         getRoomOfPlayer(id).getPlayers().get(index).setScore(score);
-        return score;
+        return getRoomOfPlayer(id).getPlayers().get(index);
     }
 
     public void distributeCards(Room myRoom, Player player, int x) {

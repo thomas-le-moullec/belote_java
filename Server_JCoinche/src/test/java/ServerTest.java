@@ -141,7 +141,7 @@ public class ServerTest {
         room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "10", 0));
         room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "9", 0));
 
-        serv.distributeCards(room, 5);
+        serv.distributeCards(room, room.getPlayers().get(0), 5);
 
         assertTrue(room.getPlayers().get(0).getCards().get(0).getType() == Card.TypeCard.CLUBS);
     }
@@ -186,8 +186,8 @@ public class ServerTest {
         testS.setRooms(new ArrayList<>());
         testS.getRooms().add(room);
 
-        score = testS.countFoldScore("1");
-        assertEquals(score, 20);
+        player = testS.countFoldScore("1");
+        assertEquals(player.getScore(), 20);
     }
 
     @Test
