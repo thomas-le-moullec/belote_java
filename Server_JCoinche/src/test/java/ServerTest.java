@@ -186,8 +186,8 @@ public class ServerTest {
         testS.setRooms(new ArrayList<>());
         testS.getRooms().add(room);
 
-        score = testS.countFoldScore("1");
-        assertEquals(score, 20);
+        player = testS.countFoldScore("1");
+        assertEquals(player.getScore(), 20);
     }
 
     @Test
