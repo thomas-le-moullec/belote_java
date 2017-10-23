@@ -66,7 +66,7 @@ public class Server {
         if (response.equals("Yes") == true || response.equals("Y") == true) {
             getRoomOfPlayer(id).setAssetTaker(id);
             for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
-                getRoomOfPlayer(id).getPlayers().get(i).setTask(ProtoTask.Protocol.TAKECARD);
+                getRoomOfPlayer(id).getPlayers().get(i).setTask(ProtoTask.Protocol.WAIT);
                 distributeCards(getRoomOfPlayer(id), getRoomOfPlayer(id).getPlayer(id), 3);
             }
             getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.PUTCARD);
@@ -98,6 +98,7 @@ public class Server {
         List<Card> fold = myRoom.getBoard().getFold();
 
         if (!checkValidity(myRoom, player, fold, card)) {
+            System.out.println("Not VALID CARD\n");
             return new PutCard(false);
         }
         getRoomOfPlayer(id).setPlays(getRoomOfPlayer(id).getPlays() + 1);
@@ -110,7 +111,8 @@ public class Server {
         int index = getRoomOfPlayer(id).getPlayers().indexOf(getRoomOfPlayer(id).getPlayer(id));
         getRoomOfPlayer(id).getPlayers().get((index + 1)%4).setTask(ProtoTask.Protocol.PUTCARD);
         getRoomOfPlayer(id).setIdTurn(getRoomOfPlayer(id).getPlayers().get((index + 1)%4).getId());
-        return new PutCard(false);
+        System.out.println("VALID CARD\n");
+        return new PutCard(true);
     }
 
     @MessageMapping("/jcoinche/askForTask/{id}")

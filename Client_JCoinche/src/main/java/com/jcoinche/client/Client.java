@@ -202,7 +202,6 @@ public class Client {
                 if (payload instanceof PutCard) {
                     if (((PutCard) payload).isVerification() == false) {
                         System.out.println("Last Putcard is not correct\n");
-                        getBoard();
                         putCard();
                     }
                 }
@@ -313,9 +312,9 @@ public class Client {
         if (infos[0].equals("DIAMOND"))
             card.setType(Card.TypeCard.DIAMOND);
         card.setValue(infos[1]);
-        System.out.println("*************TYPE ="+card.getType());
-        System.out.println("*************VALUE="+card.getValue());
-        //stompSession.send("/app/jcoinche/putCard/" + getIdClient(), CARD);
+        //System.out.println("*************TYPE ="+card.getType());
+        //System.out.println("*************VALUE="+card.getValue());
+        stompSession.send("/app/jcoinche/putCard/" + getIdClient(), card);
     }
 
     public void getBoard() {
@@ -349,8 +348,12 @@ public class Client {
 
     private class MyHandler extends StompSessionHandlerAdapter {
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
-            setIdClient(stompSession.getSessionId().toString());
-            System.out.println("ID OF CONNECTION AFTER CONNECTED:"+getIdClient());
+            //setIdClient(stompSession.getSessionId().toString());
+            Random r = new Random();
+            int n = r.nextInt(9999999);
+            String id = String.valueOf(n);
+            setIdClient(id);
+            System.out.println("ID OF CONNECTION AFTER CONNECTED:"+n);
         }
     }
 
@@ -395,6 +398,7 @@ public class Client {
             subscribePlayerCards();
             subscribeGetAsset();
             subscribeBoard();
+            subscribePutCard();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
