@@ -72,6 +72,7 @@ public class Client {
 
     public void setCards(List<Card> cards) {
         this.cards = cards;
+    //    displayCards();
         //Display Cards to User.
     }
 
@@ -157,7 +158,8 @@ public class Client {
             public void handleFrame(StompHeaders headers, Object payload) {
                 //System.out.println("RECEIVED IN HANDLEFRAME");
                 if (payload instanceof Card) {
-                    System.out.println("WE RECEIVED A CARD IN GET ASSET");
+                    System.out.println("WE RECEIVED A CARD IN GET ASSET...");
+                    displayAsset();
                     setAsset((Card) payload);
                 }
             }
@@ -281,6 +283,13 @@ public class Client {
         for (int i = 0; i < cards.size(); i++) {
             System.out.println("---> Card [" + i + "] = " + cards.get(i).getType() + " - " + cards.get(i).getValue());
         }
+
+    }
+
+    public void displayAsset() {
+        System.out.println("######### Asset #########");
+        System.out.println("|["+asset.getType()+"]...["+asset.getValue()+"]");
+        System.out.println("|_....................._\n");
     }
 
     public static void main(String[] args) throws Exception {
