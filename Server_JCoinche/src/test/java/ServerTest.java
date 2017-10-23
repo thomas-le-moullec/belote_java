@@ -4,10 +4,13 @@ import com.jcoinche.model.Player;
 import com.jcoinche.model.Room;
 import com.jcoinche.server.Server;
 import org.junit.Test;
+import org.mockito.cglib.beans.BeanMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.*;
@@ -109,7 +112,7 @@ public class ServerTest {
     @Test
     public void distributeCardsTest() throws Exception {
         Room room = new Room();
-
+        Server serv = new Server();
         room.setPlayers(new ArrayList<>());
         for (int i = 0; i < 4; i++) {
             room.getPlayers().add(new Player());
@@ -138,98 +141,73 @@ public class ServerTest {
         room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "10", 0));
         room.getBoard().getPick().add(new Card(Card.TypeCard.CLUBS, "9", 0));
 
-        //serverTest.distributeCards(room, 5);
+        serv.distributeCards(room, room.getPlayers().get(0), 5);
 
-        //assertTrue("------------->"+room.getPlayers().size(), room.getPlayers().get(0).getCards().get(0).getType() == Card.TypeCard.CLUBS);
+        assertTrue(room.getPlayers().get(0).getCards().get(0).getType() == Card.TypeCard.CLUBS);
+    }
+
+    @Test
+    public void determineFoldWinnerTest() {
+        List<Card> fold = new ArrayList<>();
+        Card firstCard = new Card(Card.TypeCard.CLUBS, "K", 0);
+        int ret;
+
+        fold.add(new Card(Card.TypeCard.CLUBS, "K", 0));
+        fold.add(new Card(Card.TypeCard.HEART, "Q", 0));
+        fold.add(new Card(Card.TypeCard.DIAMOND, "V", 0));
+        fold.add(new Card(Card.TypeCard.SPADES, "A", 0));
+
+        ret = serverTest.determineFoldWinner(fold, firstCard, Card.TypeCard.HEART, new Board().getValueCardAsset(), new Board().getValueCard());
+        assertTrue(ret == 1);
+    }
+
+    @Test
+    public void countFoldScoreTest() throws Exception {
+        Server testS = new Server();
+        Room room = new Room();
+        List<Card> fold = new ArrayList<>();
+        Player player = new Player();
+        int score;
+
+        room.setBoard(new Board());
+        fold.add(new Card(Card.TypeCard.SPADES, "K", 0));
+        fold.add(new Card(Card.TypeCard.HEART, "Q", 0));
+        fold.add(new Card(Card.TypeCard.DIAMOND, "V", 0));
+        fold.add(new Card(Card.TypeCard.CLUBS, "A", 0));
+
+        room.getBoard().setFold(fold);
+
+        player.setId("1");
+        player.setScore(0);
+        room.setPlayers(new ArrayList<>());
+        room.getPlayers().add(player);
+        room.getBoard().setAsset(new Card(Card.TypeCard.SPADES, "A", 0));
+
+        testS.setRooms(new ArrayList<>());
+        testS.getRooms().add(room);
+
+        score = testS.countFoldScore("1");
+        assertEquals(score, 20);
+    }
+
+    @Test
+    public void getRoomOfPlayerTest() {
+        Server testS = new Server();
+
+        testS.setRooms(new ArrayList<>());
+        for (int i = 0; i < 2; i++) {
+            testS.getRooms().add(new Room());
+            testS.getRooms().get(i).setPlayers(new ArrayList<>());
+            testS.getRooms().get(i).getPlayers().add(new Player());
+        }
+        testS.getRooms().get(0).getPlayers().get(0).setId("1");
+        testS.getRooms().get(0).getPlayers().get(0).setScore(10);
+        testS.getRooms().get(1).getPlayers().get(0).setId("2");
+        testS.getRooms().get(1).getPlayers().get(0).setScore(20);
+
+        Room testRoom = testS.getRoomOfPlayer("1");
+        assertEquals(testRoom.getPlayers().get(0).getScore(), 10);
+        testRoom = testS.getRoomOfPlayer("2");
+        assertEquals(testRoom.getPlayers().get(0).getScore(), 20);
     }
 }
-
-/*
-
-    @MessageMapping("/jcoinche/distributeCards/{id}")
-    @SendTo("/topic/users/{id}")
-    public void distributeCards(room) throws Exception {
-        Room myRoom = getRoomOfPlayer(id);
-        int index;
-
-        for (int tour = 0; tour < 5; tour++) {
-            for (int i = 0; i < myRoom.getPlayers().size(); i++) {
-                index = new Random().nextInt(myRoom.getBoard().getPick().size());
-                myRoom.getPlayers().get(i).getCards().add(myRoom.getBoard().getPick().get(index));
-                myRoom.getBoard().getPick().remove(index);
-            }
-        }
-        System.out.println();
-    }
-
-    public static int determineFoldWinner(List<Card> fold, Card firstCard, Card.TypeCard asset, Map<String, Integer> valueAsset, Map<String, Integer> valueNonAsset) {
-        int max;
-
-        max = 0;
-        for (int i = 1; i < fold.size(); i++) {
-            if (compareColor(fold.get(i), fold.get(max))) {
-                if (isAsset(firstCard, asset)) {
-                    if (valueAsset.get(fold.get(i).getValue()) > valueAsset.get(fold.get(max).getValue())) {
-                        max = i;
-                    }
-                }
-                else {
-                    if (valueNonAsset.get(fold.get(i).getValue()) > valueNonAsset.get(fold.get(max).getValue())) {
-                        max = i;
-                    }
-                }
-            }
-            else {
-                if (isAsset(fold.get(i), asset)) {
-                    max = i;
-                }
-                if (fold.get(i).getType() == firstCard.getType() && !isAsset(fold.get(max), asset)) {
-                    max = i;
-                }
-            }
-        }
-        return max;
-    }
-
-    @MessageMapping("/jcoinche/countFoldScore/{id}")
-    @SendTo("/topic/users/{id}")
-    public void countFoldScore(@DestinationVariable("i") String id) throws Exception {
-        int index = determineFoldWinner(getRoomOfPlayer(id).getBoard().getFold(),
-                getRoomOfPlayer(id).getBoard().getFold().get(0),
-                getRoomOfPlayer(id).getBoard().getAsset().getType(),
-                getRoomOfPlayer(id).getBoard().getValueCardAsset(),
-                getRoomOfPlayer(id).getBoard().getValueCard());
-
-        int score = getRoomOfPlayer(id).getPlayers().get(index).getScore();
-
-        for (int i = 0; i < getRoomOfPlayer(id).getBoard().getFold().size(); i++) {
-            if (isAsset(getRoomOfPlayer(id).getBoard().getFold().get(i), getRoomOfPlayer(id).getBoard().getAsset().getType())) {
-                score += getRoomOfPlayer(id).getBoard().getValueCardAsset().get(getRoomOfPlayer(id).getBoard().getFold().get(i).getValue());
-            }
-            else {
-                score += getRoomOfPlayer(id).getBoard().getValueCard().get(getRoomOfPlayer(id).getBoard().getFold().get(i).getValue());
-            }
-        }
-        getRoomOfPlayer(id).getPlayers().get(index).setScore(score);
-    }
-
-    @MessageMapping("/jcoinche/askForTask/{id}")
-    @SendTo("/topic/info/{id}")
-    public ProtoTask askForTask(@DestinationVariable("id") String id) throws Exception {
-        //Conditions to determine what to do.
-        ProtoTask task = getRoomOfPlayer(id).getPlayer(id).getTaskProtocol();
-        System.out.print("Id User =>"+id+" WE WILL "+task.getTask()+" !!! \n");
-        return task;
-    }
-
-    public Room getRoomOfPlayer(String id) {
-        for (int i = 0; i < getRooms().size() - 1; i++) { // Check if - 1 is ok or not.
-            for (int j = 0; j < getRooms().get(i).getPlayers().size() - 1; j++) {
-                if (id == getRooms().get(i).getPlayers().get(j).getId()) {
-                    return getRooms().get(i);
-                }
-            }
-        }
-        return getRooms().get(0);//have to manage error here.
-    }
- */

@@ -1,9 +1,6 @@
 package com.jcoinche.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jcoinche.model.Card;
-import com.jcoinche.model.Greeting;
-import com.jcoinche.model.Player;
-import com.jcoinche.model.ProtoTask;
+import com.jcoinche.model.*;
 import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.log4j.Logger;
 import org.springframework.messaging.Message;
@@ -41,6 +38,7 @@ public class Client {
     private ProtoTask.Protocol task;
     private Card asset;
     private boolean prompt;
+    private List<Card> fold;
 
     public Client(String url, int port) throws Exception {
         {
@@ -50,6 +48,14 @@ public class Client {
             suscribeTo();
             setTask(ProtoTask.Protocol.WAIT);
         }
+    }
+
+    public List<Card> getFold() {
+        return fold;
+    }
+
+    public void setFold(List<Card> fold) {
+        this.fold = fold;
     }
 
     public void setPrompt(boolean prompt) {
@@ -83,6 +89,7 @@ public class Client {
     public void setCards(List<Card> cards) {
         this.cards = cards;
         displayCards();
+        //Display Cards to User.
     }
 
     public String getIdClient() {
@@ -146,7 +153,33 @@ public class Client {
                         System.out.println("GO IN Get Asset\n");
                         takeAsset();
                     }
+                    if (((ProtoTask) payload).getTask() == ProtoTask.Protocol.PUTCARD) {
+                        System.out.println("GO IN Put Card\n");
+                        getBoard();
+                        putCard();
+                    }
+                }
+            }
+        });
+    }
 
+    /*
+    *
+    * Sub to /info/{id} to get info about the task to do
+    * */
+    public void subscribeBoard() throws ExecutionException, InterruptedException {
+        getStompSession().subscribe("/topic/board/" + getIdClient(), new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return Board.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                if (payload instanceof Board) {
+                    System.out.println("BOARD RECEIVE\n");
+                    setAsset(((Board) payload).getAsset());
+                    setFold(((Board) payload).getFold());
                 }
             }
         });
@@ -165,9 +198,8 @@ public class Client {
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                //System.out.println("RECEIVED IN HANDLEFRAME");
                 if (payload instanceof Card) {
-                    System.out.println("WE RECEIVED A CARD IN GET ASSET");
+                    System.out.println("WE RECEIVED A CARD IN GET ASSET...");
                     setAsset((Card) payload);
                     try {
                         choseAsset(getAsset());
@@ -223,6 +255,22 @@ public class Client {
         }
     }
 
+    public void putCard() {
+        setPrompt(true);
+        //Display Board
+        try {
+            String response = getInfosFromUser("Which card do you want to put ? \n$>");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        setPrompt(false);
+    }
+
+    public void getBoard() {
+        stompSession.send("/app/jcoinche/board/" + getIdClient(), null);
+    }
+
+
     public void takeCards() {
         getStompSession().send("/app/jcoinche/takeCards/" + getIdClient(), null);
     }
@@ -234,6 +282,7 @@ public class Client {
     public void choseAsset(Card asset) throws IOException {
         {
             setPrompt(true);
+            displayAsset();
             String response = getInfosFromUser("Do you want the asset : " + asset.getType() + " - " + asset.getValue() + " ? Y/N");
             setPrompt(false);
             if (response.equals("Y") == true || response.equals("Yes") == true) {
@@ -293,6 +342,7 @@ public class Client {
             subscribeInfos();
             subscribePlayerCards();
             subscribeGetAsset();
+            subscribeBoard();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -306,6 +356,13 @@ public class Client {
         for (int i = 0; i < cards.size(); i++) {
             System.out.println("---> Card [" + i + "] = " + cards.get(i).getType() + " - " + cards.get(i).getValue());
         }
+
+    }
+
+    public void displayAsset() {
+        System.out.println("######### Asset #########");
+        System.out.println("|["+getAsset().getType()+"]...["+getAsset().getValue()+"]");
+        System.out.println("|_....................._\n");
     }
 
     public static void main(String[] args) throws Exception {
