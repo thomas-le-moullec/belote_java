@@ -11,6 +11,7 @@ public class Room {
     private int idTurn;
     private Board board;
     private int assetTaker;
+    private int plays = 0;
 
     public Room() {
     }
@@ -20,6 +21,15 @@ public class Room {
         this.players = players;
         this.board = board;
         this.assetTaker = assetTaker;
+        this.plays = 0;
+    }
+
+    public int getPlays() {
+        return plays;
+    }
+
+    public void setPlays(int plays) {
+        this.plays = plays;
     }
 
     public void setIdTurn(int idTurn) {
@@ -43,14 +53,12 @@ public class Room {
     }
 
     public Player getPlayer(String idPlayer) {
-        int id = 0;
-        for (int i = 0; i < this.players.size(); i++) {
-            if (idPlayer == this.players.get(i).getId()) {
-                id = i;
-                break;
-            }
+        for (int i = 0; i < getPlayers().size(); i++) {
+                if (idPlayer.equals(getPlayers().get(i).getId()) == true) {
+                    return getPlayers().get(i);
+                }
         }
-        return this.players.get(id);
+        return players.get(0);
     }
 
     public void setPlayers(List<Player> players) {

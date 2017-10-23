@@ -33,13 +33,27 @@ public class Server {
     @MessageMapping("/jcoinche/takeCards/{id}")
     @SendTo("/topic/takeCards/{id}")
     public Player takeCards(@DestinationVariable("id") String id) throws Exception {
-
-        System.out.println("IN TAKECARD");
         //Conditions to determine what to do.
         Player player = getRoomOfPlayer(id).getPlayer(id);
-        getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.WAIT);
-        System.out.println("Cards of player => :"+player.getCards());
+        getRoomOfPlayer(id).setPlays(getRoomOfPlayer(id).getPlays() + 1);
+        if (getRoomOfPlayer(id).getPlays() == 4) {
+            getRoomOfPlayer(id).getPlayers().get(0).setTask(ProtoTask.Protocol.GETASSET);
+            getRoomOfPlayer(id).getPlayers().get(1).setTask(ProtoTask.Protocol.WAIT);
+            getRoomOfPlayer(id).getPlayers().get(2).setTask(ProtoTask.Protocol.WAIT);
+            getRoomOfPlayer(id).getPlayers().get(3).setTask(ProtoTask.Protocol.WAIT);
+        }
+        for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
+            System.out.println("Id : "+id+" and id Get : "+getRoomOfPlayer(id).getPlayer(id).getId()+" Task:"+getRoomOfPlayer(id).getPlayers().get(i).getTask() + " id["+i+"] : "+getRoomOfPlayer(id).getPlayers().get(i).getId());
+        }
         return player;
+    }
+
+    @MessageMapping("/jcoinche/getAsset/{id}")
+    @SendTo("/topic/getAsset/{id}")
+    public Card getAsset(@DestinationVariable("id") String id) throws Exception {
+        //Conditions to determine what to do.
+        System.out.print("Id User =>"+id+" is IN GET ASSET !!! \n");
+        return getRoomOfPlayer(id).getBoard().getAsset();
     }
 
     @MessageMapping("/jcoinche/putCard/{id}")
@@ -63,22 +77,21 @@ public class Server {
     @SendTo("/topic/info/{id}")
     public ProtoTask askForTask(@DestinationVariable("id") String id) throws Exception {
         //Conditions to determine what to do.
-        ProtoTask task = getRoomOfPlayer(id).getPlayer(id).getTaskProtocol();
-        System.out.print("Id User =>"+id+" WE WILL "+task.getTask()+" !!! \n");
-        return task;
+        ProtoTask.Protocol task = getRoomOfPlayer(id).getPlayer(id).getTask();
+        System.out.print("Id User =>"+id+" WE WILL "+task+" !!! \n");
+        return new ProtoTask(task);
     }
 
     public void addPlayerInRoom(String id) throws Exception {
         {
-
-            Player newPlayer = new Player(id, new ArrayList<Card>(), 0, 0, new ProtoTask(ProtoTask.Protocol.WAIT));
+            Player newPlayer = new Player(id, new ArrayList<Card>(), 0, 0, ProtoTask.Protocol.WAIT);
             if (rooms.size() == 0 || rooms.get(rooms.size() - 1).getPlayers().size() == 4) {
                 rooms.add(new Room(rooms.size(), new ArrayList<Player>(), new Board(), 0));
             }
             newPlayer.setTeam((rooms.size() - 1) % 2);
             rooms.get(rooms.size() - 1).getPlayers().add(newPlayer);
             if (rooms.get(rooms.size() - 1).getPlayers().size() == 4) {
-                distributeCards(rooms.get(rooms.size() - 1));
+                distributeCards(rooms.get(rooms.size() - 1), 5);
                 for (int i = 0; i < 4; i++) {
                     rooms.get(rooms.size() - 1).getPlayers().get(i).setTask(ProtoTask.Protocol.TAKECARD);
                 }
@@ -152,23 +165,20 @@ public class Server {
         getRoomOfPlayer(id).getPlayers().get(index).setScore(score);
     }
 
-    public void distributeCards(Room myRoom) throws Exception {
+    public void distributeCards(Room myRoom, int x) throws Exception {
         int index;
 
         System.out.println("ROOM.GET_PLAYER.SIZE()="+myRoom.getPlayers().size());
         System.out.println("ROOM.PICK_SIZE()="+myRoom.getBoard().getPick().size());
         System.out.println("ROOM.GETPLAYERS_SIZE="+myRoom.getPlayers().size());
-        //System.out.println("ROOM.GET_PLAYER.SIZE()="+myRoom.getPlayers().size());
 
-        for (int tour = 0; tour < 5; tour++) {
+        for (int tour = 0; tour < x; tour++) {
             for (int i = 0; i < myRoom.getPlayers().size(); i++) {
                 index = new Random().nextInt(myRoom.getBoard().getPick().size());
                 myRoom.getPlayers().get(i).getCards().add(myRoom.getBoard().getPick().get(index));
                 myRoom.getBoard().getPick().remove(index);
-                System.out.println(":::::");
             }
         }
-        System.out.println("-----------------------------------------");
     }
 
     public static int determineFoldWinner(List<Card> fold, Card firstCard, Card.TypeCard asset, Map<String, Integer> valueAsset, Map<String, Integer> valueNonAsset) {
@@ -203,7 +213,7 @@ public class Server {
     public Room getRoomOfPlayer(String id) {
         for (int i = 0; i < getRooms().size(); i++) { // Check if - 1 is ok or not.
             for (int j = 0; j < getRooms().get(i).getPlayers().size(); j++) {
-                if (id == getRooms().get(i).getPlayers().get(j).getId()) {
+                if (id.equals(getRooms().get(i).getPlayers().get(j).getId()) == true) {
                     return getRooms().get(i);
                 }
             }
@@ -213,6 +223,7 @@ public class Server {
 
     public Server() {
         rooms = new ArrayList<Room>();
+        rooms.add(new Room(rooms.size(), new ArrayList<Player>(), new Board(), 0));
     }
 
     public List<Room> getRooms() {
