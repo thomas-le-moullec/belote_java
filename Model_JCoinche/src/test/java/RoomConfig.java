@@ -9,17 +9,8 @@ import java.util.List;
 @Configuration
 public class RoomConfig {
 
-    public void configPlayerTest() {
-        List<PlayerTest> playerList = new ArrayList<>();
-        PlayerTest playerTest = new PlayerTest();
-
-        //playerTest.getId();
-        playerList.add(new PlayerTest());
-
-    }
-
     @Bean
-    public Room RoomTest() {
+    public Room RoomClassTest() {
         Room myRoom = new Room();
 
         return myRoom;
