@@ -187,6 +187,30 @@ public class Client {
 
     /*
     *
+    * Sub to /info/{id} to get info about the task to do
+    * */
+    public void subscribePutCard() throws ExecutionException, InterruptedException {
+        getStompSession().subscribe("/topic/putCard/" + getIdClient(), new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return PutCard.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                if (payload instanceof PutCard) {
+                    if (((PutCard) payload).isVerification() == false) {
+                        System.out.println("Last Putcard is not correct\n");
+                        getBoard();
+                        putCard();
+                    }
+                }
+            }
+        });
+    }
+
+    /*
+    *
     * Sub to /getAsset/{id} to get the asset
     * */
     public void subscribeGetAsset() throws ExecutionException, InterruptedException {

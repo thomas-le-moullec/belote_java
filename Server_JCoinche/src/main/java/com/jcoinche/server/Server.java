@@ -52,6 +52,7 @@ public class Server {
             getRoomOfPlayer(id).getPlayers().get(1).setTask(ProtoTask.Protocol.WAIT);
             getRoomOfPlayer(id).getPlayers().get(2).setTask(ProtoTask.Protocol.WAIT);
             getRoomOfPlayer(id).getPlayers().get(3).setTask(ProtoTask.Protocol.WAIT);
+            getRoomOfPlayer(id).setPlays(0);
         }
         for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
             System.out.println("Id : "+id+" and id Get : "+getRoomOfPlayer(id).getPlayer(id).getId()+" Task:"+getRoomOfPlayer(id).getPlayers().get(i).getTask() + " id["+i+"] : "+getRoomOfPlayer(id).getPlayers().get(i).getId());
@@ -78,6 +79,7 @@ public class Server {
             getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.WAIT);
             int index = getRoomOfPlayer(id).getPlayers().indexOf(getRoomOfPlayer(id).getPlayer(id));
             getRoomOfPlayer(id).getPlayers().get((index + 1)%4).setTask(ProtoTask.Protocol.GETASSET);
+            getRoomOfPlayer(id).setIdTurn(getRoomOfPlayer(id).getPlayers().get((index + 1)%4).getId());
         }
     }
 
@@ -89,20 +91,26 @@ public class Server {
     }
 
     @MessageMapping("/jcoinche/putCard/{id}")
-    @SendTo("/topic/users/{id}")
-    public boolean putCard(@DestinationVariable("id") String id, Card card) throws Exception {
+    @SendTo("/topic/putCard/{id}")
+    public PutCard putCard(@DestinationVariable("id") String id, Card card) throws Exception {
         Room myRoom = getRoomOfPlayer(id);
         Player player = myRoom.getPlayer(id);
         List<Card> fold = myRoom.getBoard().getFold();
 
         if (!checkValidity(myRoom, player, fold, card)) {
-            return false;
+            return new PutCard(false);
         }
-
+        getRoomOfPlayer(id).setPlays(getRoomOfPlayer(id).getPlays() + 1);
         exchangeCards(myRoom, player, card);
-        //myRoom.getBoard().getFold().add(card);
-        //player.getCards().remove(card);
-        return true;
+        if (getRoomOfPlayer(id).getPlays() == 4) {
+            getRoomOfPlayer(id).setPlays(0);
+            System.out.println("END OF FOLD !\n\n\n");
+        }
+        getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.WAIT);
+        int index = getRoomOfPlayer(id).getPlayers().indexOf(getRoomOfPlayer(id).getPlayer(id));
+        getRoomOfPlayer(id).getPlayers().get((index + 1)%4).setTask(ProtoTask.Protocol.PUTCARD);
+        getRoomOfPlayer(id).setIdTurn(getRoomOfPlayer(id).getPlayers().get((index + 1)%4).getId());
+        return new PutCard(false);
     }
 
     @MessageMapping("/jcoinche/askForTask/{id}")
