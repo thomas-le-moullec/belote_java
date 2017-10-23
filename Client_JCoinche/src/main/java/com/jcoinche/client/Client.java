@@ -159,8 +159,8 @@ public class Client {
                 //System.out.println("RECEIVED IN HANDLEFRAME");
                 if (payload instanceof Card) {
                     System.out.println("WE RECEIVED A CARD IN GET ASSET...");
-                    displayAsset();
                     setAsset((Card) payload);
+                    displayAsset();
                 }
             }
         });
@@ -288,7 +288,7 @@ public class Client {
 
     public void displayAsset() {
         System.out.println("######### Asset #########");
-        System.out.println("|["+asset.getType()+"]...["+asset.getValue()+"]");
+        System.out.println("|["+getAsset().getType()+"]...["+getAsset().getValue()+"]");
         System.out.println("|_....................._\n");
     }
 

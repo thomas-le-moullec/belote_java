@@ -108,7 +108,7 @@ public class Server {
             rooms.get(rooms.size() - 1).getPlayers().add(newPlayer);
             if (rooms.get(rooms.size() - 1).getPlayers().size() == 4) {
                 for (int i = 0; i < rooms.get(rooms.size() - 1).getPlayers().size(); i++) {
-                    distributeCards(rooms.get(rooms.size() - 1), rooms.get(rooms.size() - 1).getPlayers().get(i), i);
+                    distributeCards(rooms.get(rooms.size() - 1), rooms.get(rooms.size() - 1).getPlayers().get(i), 5);
                 }
                 rooms.get(rooms.size() - 1).getBoard().setAsset(rooms.get(rooms.size() - 1).getBoard().getPick().get(new Random().nextInt(rooms.get(rooms.size() - 1).getBoard().getPick().size())));
                 for (int i = 0; i < 4; i++) {
