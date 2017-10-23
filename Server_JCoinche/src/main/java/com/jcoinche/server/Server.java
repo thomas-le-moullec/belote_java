@@ -24,8 +24,8 @@ public class Server {
     @MessageMapping("/jcoinche/greeting/{id}")
     @SendTo("/topic/users/{id}")
     public Greeting greeting(@DestinationVariable("id") String id, HelloMessage message) throws Exception {
-        System.out.print("Id User =>"+id+" WE WILL CREATE ROOM !!\n");
-        System.out.println("ROOM SIZE:"+ rooms.size());
+        //System.out.print("Id User =>"+id+" WE WILL CREATE ROOM !!\n");
+        //System.out.println("ROOM SIZE:"+ rooms.size());
         addPlayerInRoom(id);
         return new Greeting("Hello, " + message.getName() + "!");
     }
@@ -58,7 +58,7 @@ public class Server {
     public Player getCards(@DestinationVariable("id") String id) throws Exception {
         //getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.GETPLAYER);
         for (int i = 0; i < getRoomOfPlayer(id).getPlayer(id).getCards().size(); i++) {
-            System.out.println("Card TYPE:"+getRoomOfPlayer(id).getPlayer(id).getCards().get(i).getType()+ "VALUE:"+getRoomOfPlayer(id).getPlayer(id).getCards().get(i).getValue());
+//            System.out.println("Card TYPE:"+getRoomOfPlayer(id).getPlayer(id).getCards().get(i).getType()+ "VALUE:"+getRoomOfPlayer(id).getPlayer(id).getCards().get(i).getValue());
         }
         return getRoomOfPlayer(id).getPlayer(id);
     }
@@ -77,19 +77,19 @@ public class Server {
         getRoomOfPlayer(id).setPlays(getRoomOfPlayer(id).getPlays() + 1);
         if (getRoomOfPlayer(id).getPlays() == 4) {
             getRoomOfPlayer(id).setIdTurn(id);
-            System.out.println("Id PLAYER WHEN GET ASSET:"+getRoomOfPlayer(id).getPlayers().get(0).getId());
-            System.out.println("Id PLAYER WHEN GET ASSET:"+getRoomOfPlayer(id).getPlayers().get(1).getId());
-            System.out.println("Id PLAYER WHEN GET ASSET:"+getRoomOfPlayer(id).getPlayers().get(2).getId());
-            System.out.println("Id PLAYER WHEN GET ASSET:"+getRoomOfPlayer(id).getPlayers().get(3).getId());
+//            System.out.println("Id PLAYER WHEN GET ASSET:"+getRoomOfPlayer(id).getPlayers().get(0).getId());
+//            System.out.println("Id PLAYER WHEN GET ASSET:"+getRoomOfPlayer(id).getPlayers().get(1).getId());
+//            System.out.println("Id PLAYER WHEN GET ASSET:"+getRoomOfPlayer(id).getPlayers().get(2).getId());
+//            System.out.println("Id PLAYER WHEN GET ASSET:"+getRoomOfPlayer(id).getPlayers().get(3).getId());
             getRoomOfPlayer(id).getPlayers().get(0).setTask(ProtoTask.Protocol.GETASSET);
             getRoomOfPlayer(id).getPlayers().get(1).setTask(ProtoTask.Protocol.WAIT);
             getRoomOfPlayer(id).getPlayers().get(2).setTask(ProtoTask.Protocol.WAIT);
             getRoomOfPlayer(id).getPlayers().get(3).setTask(ProtoTask.Protocol.WAIT);
             getRoomOfPlayer(id).setPlays(0);
         }
-        for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
+        /*for (int i = 0; i < getRoomOfPlayer(id).getPlayers().size(); i++) {
             System.out.println("Id : "+id+" and id Get : "+getRoomOfPlayer(id).getPlayer(id).getId()+" Task:"+getRoomOfPlayer(id).getPlayers().get(i).getTask() + " id["+i+"] : "+getRoomOfPlayer(id).getPlayers().get(i).getId());
-        }
+        }*/
         return player;
     }
 
@@ -103,10 +103,10 @@ public class Server {
                 distributeCards(getRoomOfPlayer(id), getRoomOfPlayer(id).getPlayers().get(i), 3);
             }
             getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.PUTCARD);
-            System.out.println("Id PLAYER WHEN GET TAKEASSET:"+getRoomOfPlayer(id).getPlayers().get(0).getId()+" task:"+getRoomOfPlayer(id).getPlayers().get(0).getTask());
-            System.out.println("Id PLAYER WHEN GET TAKEASSET:"+getRoomOfPlayer(id).getPlayers().get(1).getId()+" task:"+getRoomOfPlayer(id).getPlayers().get(1).getTask());
-            System.out.println("Id PLAYER WHEN GET TAKEASSET:"+getRoomOfPlayer(id).getPlayers().get(2).getId()+" task:"+getRoomOfPlayer(id).getPlayers().get(2).getTask());
-            System.out.println("Id PLAYER WHEN GET TAKEASSET:"+getRoomOfPlayer(id).getPlayers().get(3).getId()+" task:"+getRoomOfPlayer(id).getPlayers().get(3).getTask());
+//            System.out.println("Id PLAYER WHEN GET TAKEASSET:"+getRoomOfPlayer(id).getPlayers().get(0).getId()+" task:"+getRoomOfPlayer(id).getPlayers().get(0).getTask());
+//            System.out.println("Id PLAYER WHEN GET TAKEASSET:"+getRoomOfPlayer(id).getPlayers().get(1).getId()+" task:"+getRoomOfPlayer(id).getPlayers().get(1).getTask());
+//            System.out.println("Id PLAYER WHEN GET TAKEASSET:"+getRoomOfPlayer(id).getPlayers().get(2).getId()+" task:"+getRoomOfPlayer(id).getPlayers().get(2).getTask());
+//            System.out.println("Id PLAYER WHEN GET TAKEASSET:"+getRoomOfPlayer(id).getPlayers().get(3).getId()+" task:"+getRoomOfPlayer(id).getPlayers().get(3).getTask());
         }
         else {
             getRoomOfPlayer(id).getPlayer(id).setTask(ProtoTask.Protocol.WAIT);
@@ -119,7 +119,7 @@ public class Server {
     @MessageMapping("/jcoinche/getAsset/{id}")
     @SendTo("/topic/getAsset/{id}")
     public Card getAsset(@DestinationVariable("id") String id) throws Exception {
-        System.out.print("Id User =>"+id+" is IN GET ASSET !!! \n");
+//        System.out.print("Id User =>"+id+" is IN GET ASSET !!! \n");
         return getRoomOfPlayer(id).getBoard().getAsset();
     }
 
@@ -131,7 +131,7 @@ public class Server {
         List<Card> fold = myRoom.getBoard().getFold();
 
         if (!checkValidity(myRoom, player, fold, card)) {
-            System.out.println("Not VALID CARD\n");
+//            System.out.println("Not VALID CARD\n");
             return new PutCard(false);
         }
         getRoomOfPlayer(id).setPlays(getRoomOfPlayer(id).getPlays() + 1);
@@ -157,7 +157,7 @@ public class Server {
         }
         getRoomOfPlayer(id).getPlayers().get((index + 1)%4).setTask(ProtoTask.Protocol.PUTCARD);
         getRoomOfPlayer(id).setIdTurn(getRoomOfPlayer(id).getPlayers().get((index + 1)%4).getId());
-        System.out.println("VALID CARD\n");
+//        System.out.println("VALID CARD\n");
         return new PutCard(true);
     }
 
@@ -166,7 +166,7 @@ public class Server {
     public ProtoTask askForTask(@DestinationVariable("id") String id) throws Exception {
         //Conditions to determine what to do.
         ProtoTask.Protocol task = getRoomOfPlayer(id).getPlayer(id).getTask();
-        System.out.print("Id User =>"+id+" WE WILL "+task+" !!! \n");
+//        System.out.print("Id User =>"+id+" WE WILL "+task+" !!! \n");
         return new ProtoTask(task);
     }
 

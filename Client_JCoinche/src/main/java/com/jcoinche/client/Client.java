@@ -142,18 +142,18 @@ public class Client {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 if (payload instanceof ProtoTask) {
-                    System.out.println("TASK TO DO:"+((ProtoTask) payload).getTask());
+                    //System.out.println("TASK TO DO:"+((ProtoTask) payload).getTask());
                     setTask(((ProtoTask) payload).getTask());
                     if (((ProtoTask) payload).getTask() == ProtoTask.Protocol.TAKECARD) {
-                        System.out.println("GO IN TAKE CARDS\n");
+//                        System.out.println("GO IN TAKE CARDS\n");
                         takeCards();
                     }
                     if (((ProtoTask) payload).getTask() == ProtoTask.Protocol.GETASSET) {
-                        System.out.println("GO IN Get Asset\n");
+//                        System.out.println("GO IN Get Asset\n");
                         takeAsset();
                     }
                     if (((ProtoTask) payload).getTask() == ProtoTask.Protocol.PUTCARD) {
-                        System.out.println("GO IN Put Card\n");
+//                        System.out.println("GO IN Put Card\n");
                         getBoard();
                         getPlayer();
                         //putCard();
@@ -181,7 +181,7 @@ public class Client {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 if (payload instanceof Board) {
-                    System.out.println("BOARD RECEIVE\n");
+//                    System.out.println("BOARD RECEIVE\n");
                     setAsset(((Board) payload).getAsset());
                     setFold(((Board) payload).getFold());
                 }
@@ -274,9 +274,9 @@ public class Client {
             public void handleFrame(StompHeaders headers, Object payload) {
                 if (payload instanceof Player) {
                     setCards(((Player) payload).getCards());
-                    for (int i = 0; i < ((Player) payload).getCards().size(); i++) {
-                        System.out.println("---> Card [" + i + "] = " + ((Player) payload).getCards().get(i).getType() + " - " + ((Player) payload).getCards().get(i).getValue());
-                    }
+//                    for (int i = 0; i < ((Player) payload).getCards().size(); i++) {
+//                        System.out.println("---> Card [" + i + "] = " + ((Player) payload).getCards().get(i).getType() + " - " + ((Player) payload).getCards().get(i).getValue());
+//                    }
                     putCard();
                 }
             }
@@ -297,7 +297,7 @@ public class Client {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 if (payload instanceof Player) {
-                    System.out.println("Cards from handle :" + ((Player) payload).getCards());
+//                    System.out.println("Cards from handle :" + ((Player) payload).getCards());
                     setCards(((Player) payload).getCards());
                 }
             }
@@ -316,13 +316,13 @@ public class Client {
 
     public void greeting(StompSession stompSession, String name) {
         String jsonHello = "{\"name\" : \"" + name + "\" }";
-        System.out.print("ID: "+getIdClient()+" Name entered :" + jsonHello);//debug
+//        System.out.print("ID: "+getIdClient()+" Name entered :" + jsonHello);//debug
         stompSession.send("/app/jcoinche/greeting/" + getIdClient(), jsonHello.getBytes());
     }
 
     public void askForTask(StompSession stompSession) {
         if (getPrompt() == false) {
-            System.out.print("ID is sending message:" + getIdClient() + "\n");//debug
+//            System.out.print("ID is sending message:" + getIdClient() + "\n");//debug
             stompSession.send("/app/jcoinche/askForTask/" + getIdClient(), null);
         }
     }
@@ -341,7 +341,7 @@ public class Client {
         try {
             displayCards();
             displayBoard();
-            response = getInfosFromUser("Which card do you want to put ? \n$>");
+            response = getInfosFromUser("Which card do you want to put ?");
         } catch (IOException e) {
             response = "";
             e.printStackTrace();
@@ -410,7 +410,7 @@ public class Client {
             int n = r.nextInt(9999999);
             String id = String.valueOf(n);
             setIdClient(id);
-            System.out.println("ID OF CONNECTION AFTER CONNECTED:"+n);
+//            System.out.println("ID OF CONNECTION AFTER CONNECTED:"+n);
         }
     }
 
@@ -463,14 +463,14 @@ public class Client {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("RUN PROG TASK");
+  //      System.out.println("RUN PROG TASK");
         this.runTask(this);
     }
 
     public void displayBoard() {
         System.out.println("########################### FOLD ###########################");
         for (int i = 0; i < getFold().size(); i++) {
-            System.out.println("......"+getFold().get(i).getType()+"..."+getFold().get(i).getValue()+"...");
+            System.out.println("> Type : ["+getFold().get(i).getType()+"]\tValue : ["+getFold().get(i).getValue()+"]");
         }
         System.out.println("------------------------------------------------------------");
         displayCards();
@@ -478,17 +478,16 @@ public class Client {
     }
 
     public void displayCards() {
-        System.out.println("########################### YOUR CARDS ###########################");
+        System.out.println("######################## YOUR CARDS ########################");
         for (int i = 0; i < cards.size(); i++) {
-            System.out.println("---> Card [" + i + "] = " + cards.get(i).getType() + " - " + cards.get(i).getValue());
+            System.out.println("> Card [" + i + "] = " + cards.get(i).getType() + " - " + cards.get(i).getValue());
         }
-
+        System.out.println("------------------------------------------------------------");
     }
 
     public void displayAsset() {
         System.out.println("######### Asset #########");
-        System.out.println("|["+getAsset().getType()+"]...["+getAsset().getValue()+"]");
-        System.out.println("|_....................._\n");
+        System.out.println("> Type : ["+getAsset().getType()+"]\tValue : ["+getAsset().getValue()+"]");
     }
 
     public static void main(String[] args) throws Exception {
