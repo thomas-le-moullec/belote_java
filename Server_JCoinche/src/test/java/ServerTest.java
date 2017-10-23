@@ -146,7 +146,7 @@ public class ServerTest {
     }
 
     @Test
-    public void determineFoldWinnerTest() {
+    public int determineFoldWinnerTest() {
         List<Card> fold = new ArrayList<>();
         Card firstCard = new Card(Card.TypeCard.CLUBS, "K", 0);
         Map<String, Integer> valueAsset = new Board().getValueCardAsset();
@@ -159,11 +159,25 @@ public class ServerTest {
 
         ret = serverTest.determineFoldWinner(fold, firstCard, Card.TypeCard.HEART, new Board().getValueCardAsset(), new Board().getValueCard());
         assertTrue(ret == 1);
+        return ret;
     }
 
     @Test
     public void countFoldScore() {
+        /*String id = "0";
+        Player player = new Player();
+        Room room = new Room();
 
+        player.setId("id");
+        player.setCards(new ArrayList<>());
+        player.getCards().add(new Card(Card.TypeCard.CLUBS, "K", 0)); //4
+        player.getCards().add(new Card(Card.TypeCard.HEART, "Q", 0)); //3
+        player.getCards().add(new Card(Card.TypeCard.DIAMOND, "V", 0)); //2
+        player.getCards().add(new Card(Card.TypeCard.SPADES, "A", 0)); //
+        room.setPlayers(new ArrayList<>());
+        room.getPlayers().add(player);
+        room.setBoard(new Board());
+        room.getBoard().setAsset(new Card(Card.TypeCard.SPADES, "A", 0));*/
     }
 }
 
