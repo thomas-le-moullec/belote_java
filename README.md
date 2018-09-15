@@ -1,6 +1,8 @@
 Java_jcoinche_2017
 ===================
 
+Client/server solution in order to play Coinche (a version of the French card game, Belote). Spring MVC and WebSocket 
+
 ####Ce projet consistait en l'élaboration d'un jeu de coinche, au travers d'une architecture client/serveur et du langage de programmation Java.
 
 ----------
